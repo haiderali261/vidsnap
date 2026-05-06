@@ -1367,27 +1367,48 @@ async function realFetch(url) {
   document.getElementById('resultCard').classList.add('on');
 }
 
+function cleanLabel(raw) {
+  if (!raw) return 'HD';
+  if (raw === 'download') return 'Best';
+  const m = raw.match(/(\d{3,4})p/);
+  if (m) return m[1]+'p';
+  if (raw.includes('4K') || raw.includes('2160')) return '4K';
+  if (raw.includes('1080')) return '1080p';
+  if (raw.includes('720')) return '720p';
+  if (raw.includes('480')) return '480p';
+  if (raw.includes('360')) return '360p';
+  return raw.length > 10 ? 'HD' : raw;
+}
+
 function renderApiFormats(fmts) {
   const grid = document.getElementById('qGrid');
   selQuality = null;
-  grid.innerHTML = fmts.map((f,i) => {
-    const badge = f.quality_label?.includes('4K') ? '4k' : f.quality_label?.match(/1080|720/) ? 'hd' : 'sd';
-    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${f.url||''}','${f.ext||'mp4'}','${f.quality_label||'HD'}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
-      <div class="q-res">${f.quality_label||f.format_id||'HD'}</div>
+  const seen = new Set();
+  const unique = fmts.filter(f => {
+    const lbl = cleanLabel(f.quality_label);
+    if (seen.has(lbl)) return false;
+    seen.add(lbl); return true;
+  });
+  grid.innerHTML = unique.map((f,i) => {
+    const lbl = cleanLabel(f.quality_label);
+    const badge = lbl.includes('4K') || lbl.includes('2160') ? '4k' : lbl.match(/1080|720/) ? 'hd' : 'sd';
+    const safeUrl = encodeURIComponent(f.url||'');
+    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${safeUrl}','${f.ext||'mp4'}','${lbl}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
+      <div class="q-res">${lbl}</div>
       <div class="q-detail">${(f.ext||'mp4').toUpperCase()}</div>
       <div><span class="q-badge ${BADGE_Q[badge]||'bsd'}">${BADGE_QL[badge]||'SD'}</span></div>
     </div>`;
   }).join('');
-  fmts.forEach((_,i) => setTimeout(() => {
+  unique.forEach((_,i) => setTimeout(() => {
     const el = document.getElementById('qb-'+i);
     if(el){el.style.opacity='1';el.style.transform='translateY(0)';}
   }, 20+i*60));
 }
 
-function pickQApi(i, url, ext, label) {
+function pickQApi(i, safeUrl, ext, label) {
   document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
   document.getElementById('qb-'+i)?.classList.add('sel');
-  selQuality = { label, ext, url };
+  selQuality = { label, ext, url: decodeURIComponent(safeUrl) };
   const dlBtn = document.getElementById('dlBtn');
   dlBtn.disabled = false;
   dlBtn.innerHTML = `⬇ Download ${label} ${ext.toUpperCase()}`;
