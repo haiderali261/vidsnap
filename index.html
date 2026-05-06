@@ -1315,8 +1315,48 @@ async function realFetch(url) {
   });
   if (!res.ok) throw new Error('API '+res.status);
   const data = await res.json();
-  showResult({ title: data.title || 'Video', thumb: data.thumbnail || '', duration: data.duration });
-  if (data.formats?.length) renderApiFormats(data.formats);
+
+  // Handle different API response formats
+  let formats = [];
+  let title = 'Video';
+  let thumb = '';
+  let duration = '';
+
+  if (data.title) title = data.title;
+  if (data.thumbnail) thumb = data.thumbnail;
+  if (data.duration) duration = data.duration;
+
+  // Format 1: data.formats array
+  if (data.formats?.length) {
+    formats = data.formats;
+  }
+  // Format 2: data.medias array (some APIs use this)
+  else if (data.medias?.length) {
+    formats = data.medias.map(m => ({
+      url: m.url,
+      ext: m.extension || m.ext || 'mp4',
+      quality_label: m.quality || m.label || 'HD'
+    }));
+  }
+  // Format 3: data.links array
+  else if (data.links?.length) {
+    formats = data.links.map(m => ({
+      url: m.url,
+      ext: m.type || 'mp4',
+      quality_label: m.quality || 'HD'
+    }));
+  }
+  // Format 4: direct url in data
+  else if (data.url) {
+    formats = [{ url: data.url, ext: 'mp4', quality_label: 'HD' }];
+  }
+  // Format 5: data.video direct
+  else if (data.video) {
+    formats = [{ url: data.video, ext: 'mp4', quality_label: 'HD' }];
+  }
+
+  showResult({ title, thumb, duration });
+  if (formats.length) renderApiFormats(formats);
   else renderQ(VQ);
   document.getElementById('resultCard').classList.add('on');
 }
@@ -1397,36 +1437,39 @@ function startDl() {
 
 function showAd() {
   const overlay = document.getElementById('adOverlay');
+  if (!overlay) { doDownload(); return; }
   overlay.classList.add('on');
   document.body.style.overflow = 'hidden';
 
   let left = 5;
-  document.getElementById('adTimer').textContent = left+'s';
-  document.getElementById('adCount').textContent = left;
-  document.getElementById('skipBtn').disabled = true;
-  document.getElementById('skipBtn').className = 'btn-skip';
-  document.getElementById('skipBtn').textContent = '⏳ Please wait...';
+  const timerEl = document.getElementById('adTimer');
+  const countEl = document.getElementById('adCount');
+  const skipEl = document.getElementById('skipBtn');
+  const fillEl = document.getElementById('adFill');
 
-  const fill = document.getElementById('adFill');
-  fill.style.transition = 'none';
-  fill.style.width = '0%';
-  void fill.offsetWidth;
-  fill.style.transition = `width 5s linear`;
-  setTimeout(() => { fill.style.width = '100%'; }, 30);
+  if (timerEl) timerEl.textContent = left+'s';
+  if (countEl) countEl.textContent = left;
+  if (skipEl) { skipEl.disabled = true; skipEl.className = 'btn-skip'; skipEl.textContent = '⏳ Please wait...'; }
+
+  if (fillEl) {
+    fillEl.style.transition = 'none';
+    fillEl.style.width = '0%';
+    void fillEl.offsetWidth;
+    fillEl.style.transition = `width 5s linear`;
+    setTimeout(() => { fillEl.style.width = '100%'; }, 30);
+  }
 
   clearInterval(adTick);
   adTick = setInterval(() => {
     left--;
-    document.getElementById('adTimer').textContent = left+'s';
-    document.getElementById('adCount').textContent = left;
+    if (timerEl) timerEl.textContent = left+'s';
+    if (countEl) countEl.textContent = left;
     if (left <= 0) {
       clearInterval(adTick);
-      const btn = document.getElementById('skipBtn');
-      btn.disabled = false;
-      btn.className = 'btn-skip go';
-      btn.textContent = '✓ Continue to Download';
-      document.getElementById('adTimer').textContent = '✓';
-      document.querySelector('.ad-info').innerHTML = '✅ Your download is ready!';
+      if (skipEl) { skipEl.disabled = false; skipEl.className = 'btn-skip go'; skipEl.textContent = '✓ Continue to Download'; }
+      if (timerEl) timerEl.textContent = '✓';
+      const adInfo = document.querySelector('.ad-info');
+      if (adInfo) adInfo.innerHTML = '✅ Your download is ready!';
     }
   }, 1000);
 }
