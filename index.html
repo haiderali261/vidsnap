@@ -1459,7 +1459,12 @@ let adTick = null;
 
 function startDl() {
   if (!selQuality) return;
-  showAd();
+  const overlay = document.getElementById('adOverlay');
+  if (overlay) {
+    showAd();
+  } else {
+    doDownload();
+  }
 }
 
 function showAd() {
@@ -1516,13 +1521,7 @@ function doDownload() {
   document.getElementById('dlName').textContent = `video_${label}.${ext}`;
 
   if (selQuality?.url) {
-    const a = document.createElement('a');
-    a.href = selQuality.url;
-    a.download = `video_${label}.${ext}`;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    window.open(selQuality.url, '_blank');
   }
 
   let pct = 0;
