@@ -1310,8 +1310,14 @@ async function fetchVideo() {
 
 async function realFetch(url) {
   const host = 'all-video-downloader4.p.rapidapi.com';
-  const res = await fetch(`https://${host}/dl?url=${encodeURIComponent(url)}`, {
-    headers: { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': host }
+  const res = await fetch(`https://${host}/download`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'x-rapidapi-key': RAPIDAPI_KEY,
+      'x-rapidapi-host': host
+    },
+    body: `url=${encodeURIComponent(url)}`
   });
   if (!res.ok) throw new Error('API '+res.status);
   const data = await res.json();
