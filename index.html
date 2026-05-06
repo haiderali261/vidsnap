@@ -1488,8 +1488,10 @@ function showAd() {
 
 function skipAd() {
   clearInterval(adTick);
-  document.getElementById('adOverlay').classList.remove('on');
+  const ov = document.getElementById('adOverlay');
+  if (ov) ov.classList.remove('on');
   document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
   doDownload();
 }
 
@@ -1501,7 +1503,16 @@ function doDownload() {
   document.getElementById('dlName').textContent = `video_${label}.${ext}`;
 
   if (selQuality?.url) {
-    window.open(selQuality.url, '_blank');
+    const a = document.createElement('a');
+    a.href = selQuality.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 1000);
+    // Also reset body overflow just in case
+    document.body.style.overflow = '';
   }
 
   let pct = 0;
