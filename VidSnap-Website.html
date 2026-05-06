@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VidSnap — Universal Video & Media Downloader</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07080f;
+  --surface: #0f1018;
+  --surface2: #171820;
+  --surface3: #1e2030;
+  --border: #252638;
+  --border2: #2e3050;
+  --accent: #00e5ff;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --accent4: #10b981;
+  --text: #eeeef8;
+  --muted: #7878a0;
+  --muted2: #555570;
+  --danger: #ef4444;
+  --glow: rgba(0,229,255,0.15);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background FX */
+.bg-fx {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.bg-fx::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation: orb1 20s ease-in-out infinite alternate;
+}
+.bg-fx::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%);
+  bottom: 0; right: -100px;
+  animation: orb2 18s ease-in-out infinite alternate;
+}
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes orb1 { from{transform:translate(0,0);} to{transform:translate(80px,60px);} }
+@keyframes orb2 { from{transform:translate(0,0);} to{transform:translate(-60px,-80px);} }
+
+/* LAYOUT */
+.wrap { position: relative; z-index: 1; }
+
+/* NAV */
+nav {
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(7,8,15,0.92);
+  backdrop-filter: blur(16px);
+  z-index: 100;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 900;
+  color: #000;
+  font-family: 'Syne', sans-serif;
+}
+.logo-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+.logo-name span { color: var(--accent); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-tag {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.25);
+  color: var(--accent4);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.nav-count {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.nav-count strong { color: var(--accent); }
+
+/* HERO */
+.hero {
+  padding: 64px 24px 48px;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,229,255,0.07);
+  border: 1px solid rgba(0,229,255,0.18);
+  color: var(--accent);
+  padding: 6px 18px;
+  border-radius: 24px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 28px;
+  animation: fadeDown 0.5s ease both;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px;
+  animation: fadeDown 0.5s 0.08s ease both;
+}
+.grad-text {
+  background: linear-gradient(120deg, var(--accent) 0%, #60a5fa 50%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 520px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+  animation: fadeDown 0.5s 0.16s ease both;
+}
+@keyframes fadeDown { from{opacity:0;transform:translateY(-14px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+
+/* SEARCH BOX */
+.search-wrap {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  animation: fadeDown 0.5s 0.24s ease both;
+}
+.search-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: 16px;
+  padding: 6px 6px 6px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(0,229,255,0.08);
+}
+.search-icon { color: var(--muted); font-size: 18px; flex-shrink: 0; }
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  min-width: 0;
+}
+.search-input::placeholder { color: var(--muted2); }
+.platform-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 90px;
+  transition: all 0.2s;
+}
+.platform-chip.detected { color: var(--accent4); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
+.btn-go {
+  background: linear-gradient(135deg, var(--accent), #00b8d4);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.btn-go:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,229,255,0.28); }
+.btn-go:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.spinner { width:15px;height:15px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+.loading-strip {
+  height: 3px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+  display: none;
+}
+.loading-strip.on { display: block; }
+.loading-strip-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+@keyframes shimmer { from{background-position:200% 0;} to{background-position:-200% 0;} }
+
+/* ERROR */
+.err-box {
+  display: none;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: #fca5a5;
+  font-size: 0.85rem;
+  margin-top: 10px;
+  align-items: center;
+  gap: 8px;
+}
+.err-box.on { display: flex; }
+
+/* RESULT CARD */
+.result-card {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  overflow: hidden;
+  display: none;
+}
+.result-card.on { display: block; animation: fadeUp 0.4s ease; }
+.result-card-top {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+}
+.result-inner { padding: 20px; }
+.video-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+.video-thumb-wrap {
+  width: 112px; height: 70px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+.video-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.video-info-col { flex: 1; min-width: 0; }
+.v-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+.v-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip {
+  font-size: 0.7rem;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.chip-cyan { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); color: var(--accent); }
+.chip-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: var(--accent4); }
+.chip-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--accent3); }
+.chip-purple { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); color: #a78bfa; }
+.chip-demo { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--accent3); }
+
+/* FORMAT TOGGLE */
+.fmt-row { display: flex; gap: 6px; margin-bottom: 14px; }
+.fmt-btn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.fmt-btn.active {
+  background: var(--surface3);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* QUALITY GRID */
+.q-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.q-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.q-btn {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  color: var(--text);
+}
+.q-btn:hover { border-color: var(--accent); background: rgba(0,229,255,0.05); transform: translateY(-2px); }
+.q-btn.sel {
+  border-color: var(--accent);
+  background: rgba(0,229,255,0.1);
+  box-shadow: 0 0 16px rgba(0,229,255,0.12);
+}
+.q-btn.sel::after {
+  content: '✓';
+  position: absolute;
+  top: 4px; right: 7px;
+  font-size: 9px;
+  color: var(--accent);
+}
+.q-res {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 1px;
+}
+.q-btn.sel .q-res { color: var(--accent); }
+.q-detail { font-size: 0.68rem; color: var(--muted); }
+.q-badge {
+  display: inline-block;
+  font-size: 0.56rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+.b4k { background: rgba(245,158,11,0.15); color: var(--accent3); }
+.bhd { background: rgba(0,229,255,0.1); color: var(--accent); }
+.bsd { background: rgba(120,120,160,0.1); color: var(--muted); }
+.bau { background: rgba(124,58,237,0.1); color: #a78bfa; }
+
+/* DL BUTTON */
+.btn-dl {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent2), #9333ea);
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn-dl:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(124,58,237,0.32); }
+.btn-dl:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* PROGRESS */
+.dl-progress {
+  display: none;
+  margin-top: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.dl-progress.on { display: block; animation: fadeUp 0.3s ease; }
+.dl-top { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.82rem; }
+.dl-name { font-weight: 600; color: var(--text); }
+.dl-pct { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); }
+.dl-bar { height: 5px; background: var(--border); border-radius: 5px; overflow: hidden; margin-bottom: 6px; }
+.dl-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 5px; transition: width 0.3s ease; }
+.dl-meta { display: flex; gap: 14px; font-size: 0.72rem; color: var(--muted); }
+
+/* AD OVERLAY */
+.ad-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ad-overlay.on { display: flex; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.ad-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 22px;
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+  animation: popIn 0.3s ease;
+}
+@keyframes popIn { from{transform:scale(0.88);opacity:0;} to{transform:scale(1);opacity:1;} }
+.ad-head {
+  background: linear-gradient(135deg, var(--accent2), #9333ea);
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ad-head h3 { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: 0.95rem; }
+.ad-timer-badge {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.ad-body { padding: 22px; }
+.ad-slot {
+  width: 100%; height: 180px;
+  background: linear-gradient(135deg, var(--surface2), var(--surface3));
+  border: 2px dashed var(--border2);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  color: var(--muted2);
+}
+.ad-slot-icon { font-size: 32px; opacity: 0.4; }
+.ad-slot-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem; }
+.ad-slot-sub { font-size: 0.72rem; opacity: 0.6; }
+.ad-prog { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+.ad-prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 4px; width: 0%; transition: width 1s linear; }
+.ad-info { text-align: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
+.btn-skip {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: not-allowed;
+  transition: all 0.2s;
+}
+.btn-skip.go {
+  background: linear-gradient(135deg, var(--accent), #00b8d4);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-skip.go:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,229,255,0.28); }
+
+/* ======================== TOOLS SECTION ======================== */
+.tools-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+.section-head {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.section-head h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.section-head p { color: var(--muted); font-size: 0.92rem; }
+
+/* CATEGORY FILTER */
+.cat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.cat-btn {
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.cat-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.05); }
+.cat-btn.active {
+  background: rgba(0,229,255,0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* SEARCH TOOLS */
+.tool-search-wrap {
+  max-width: 420px;
+  margin: 0 auto 32px;
+}
+.tool-search {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.tool-search:focus { border-color: var(--accent); }
+.tool-search::placeholder { color: var(--muted2); }
+
+/* TOOLS GRID */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+.tool-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--card-color, rgba(0,229,255,0.04)), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.tool-card:hover::before { opacity: 1; }
+.tool-card:hover {
+  border-color: var(--card-color, var(--accent));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+}
+.tool-card.active-tool {
+  border-color: var(--accent);
+  background: rgba(0,229,255,0.06);
+}
+
+.tool-top { display: flex; align-items: center; justify-content: space-between; }
+.tool-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.tool-arrow {
+  color: var(--muted2);
+  font-size: 14px;
+  transition: all 0.2s;
+  position: relative;
+  z-index: 1;
+}
+.tool-card:hover .tool-arrow { color: var(--accent); transform: translate(2px, -2px); }
+
+.tool-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
+}
+.tool-desc {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.45;
+  position: relative;
+  z-index: 1;
+}
+.tool-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+}
+.badge-free { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: var(--accent4); }
+.badge-hd { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); color: var(--accent); }
+.badge-music { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); color: #a78bfa; }
+.badge-image { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--accent3); }
+.badge-hot { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+
+/* CATEGORY GROUP LABEL */
+.cat-group-label {
+  grid-column: 1 / -1;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 0 2px;
+  border-bottom: 1px solid var(--border);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* STATS BAR */
+.stats-bar {
+  max-width: 720px;
+  margin: 0 auto 48px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeDown 0.5s 0.32s ease both;
+}
+.stat-item {
+  flex: 1;
+  min-width: 100px;
+  padding: 16px 20px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.stat-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+/* HOW TO */
+.howto {
+  max-width: 900px;
+  margin: 0 auto 60px;
+  padding: 0 24px;
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 18px;
+}
+.step-num {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #000;
+  margin-bottom: 12px;
+}
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 5px;
+}
+.step-desc { font-size: 0.77rem; color: var(--muted); line-height: 1.5; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 24px;
+  position: relative;
+  z-index: 1;
+}
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 20px;
+  margin-bottom: 16px;
+}
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--accent); }
+.footer-note { font-size: 0.75rem; color: var(--muted2); line-height: 1.6; }
+.footer-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: inline-block;
+}
+.footer-logo span { color: var(--accent); }
+
+/* NO RESULTS */
+.no-results {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+}
+.no-results-icon { font-size: 48px; margin-bottom: 12px; }
+.no-results p { font-size: 0.9rem; }
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .search-box { padding: 8px 12px 8px 14px; flex-wrap: wrap; gap: 8px; }
+  .btn-go { width: 100%; justify-content: center; }
+  .platform-chip { display: none; }
+  .video-row { flex-direction: column; }
+  .video-thumb-wrap { width: 100%; height: 100px; }
+  .stats-bar { flex-direction: column; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat-item:last-child { border-bottom: none; }
+  nav .nav-count { display: none; }
+  .q-grid { grid-template-columns: repeat(3, 1fr); }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media(max-width:380px){
+  .tools-grid { grid-template-columns: 1fr 1fr; }
+  .q-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+
+<div class="wrap">
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-mark">V</div>
+    <span class="logo-name">Vid<span>Snap</span></span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-tag">● Free</span>
+    <span class="nav-count"><strong>50+</strong> Tools</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="live-dot"></span>
+    Universal Downloader — 50+ Platforms
+  </div>
+  <h1>Download <span class="grad-text">Any Video</span><br>From Any Platform</h1>
+  <p>One tool for all platforms. Download videos, music & images from 50+ websites in HD, Full HD and 4K quality — completely free.</p>
+</div>
+
+<!-- SEARCH -->
+<div style="max-width:720px;margin:0 auto;padding:0 24px 32px;" id="downloaderWrap">
+  <div class="search-box" id="searchBox">
+    <span class="search-icon">🔗</span>
+    <input type="url" class="search-input" id="urlInput" placeholder="Paste video URL here — YouTube, TikTok, Instagram..." autocomplete="off" />
+    <div class="platform-chip" id="platChip">🌐 Auto Detect</div>
+    <button class="btn-go" id="goBtn" onclick="fetchVideo()">
+      <span id="goBtnInner">⬇ Fetch</span>
+    </button>
+  </div>
+  <div class="loading-strip" id="loadStrip"><div class="loading-strip-inner"></div></div>
+  <div class="err-box" id="errBox"><span>⚠️</span><span id="errTxt">Error</span></div>
+</div>
+
+<!-- RESULT CARD -->
+<div class="result-card" id="resultCard" style="max-width:720px;margin:0 auto 32px;padding:0 24px;">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:18px;overflow:hidden;">
+    <div class="result-card-top"></div>
+    <div class="result-inner">
+      <div class="video-row">
+        <div class="video-thumb-wrap" id="thumbWrap">🎬</div>
+        <div class="video-info-col">
+          <div class="v-title" id="vTitle">—</div>
+          <div class="v-chips" id="vChips"></div>
+        </div>
+      </div>
+      <div class="fmt-row">
+        <button class="fmt-btn active" onclick="switchFmt('video',this)">🎬 Video</button>
+        <button class="fmt-btn" onclick="switchFmt('audio',this)">🎵 Audio</button>
+      </div>
+      <div class="q-label">Select Quality</div>
+      <div class="q-grid" id="qGrid"></div>
+      <button class="btn-dl" id="dlBtn" onclick="startDl()" disabled>⬇ Select Quality to Download</button>
+      <div class="dl-progress" id="dlProg">
+        <div class="dl-top">
+          <span class="dl-name" id="dlName">file.mp4</span>
+          <span class="dl-pct" id="dlPct">0%</span>
+        </div>
+        <div class="dl-bar"><div class="dl-bar-fill" id="dlFill" style="width:0%"></div></div>
+        <div class="dl-meta">
+          <span id="dlSpd">—</span>
+          <span id="dlEta">ETA: —</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">50+</div><div class="stat-lbl">Platforms</div></div>
+  <div class="stat-item"><div class="stat-num">4K</div><div class="stat-lbl">Max Quality</div></div>
+  <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">No Signup</div></div>
+  <div class="stat-item"><div class="stat-num">MP3</div><div class="stat-lbl">Audio Extract</div></div>
+  <div class="stat-item"><div class="stat-num">Fast</div><div class="stat-lbl">Download Speed</div></div>
+</div>
+
+<!-- TOOLS SECTION -->
+<div class="tools-section" id="toolsSection">
+  <div class="section-head">
+    <h2>All Downloader Tools</h2>
+    <p>Click any tool below to load the downloader for that platform</p>
+  </div>
+
+  <!-- CATEGORY FILTER -->
+  <div class="cat-filter">
+    <button class="cat-btn active" onclick="filterTools('all',this)">🌐 All Tools</button>
+    <button class="cat-btn" onclick="filterTools('social',this)">📱 Social Media</button>
+    <button class="cat-btn" onclick="filterTools('video',this)">🎬 Video Platforms</button>
+    <button class="cat-btn" onclick="filterTools('music',this)">🎵 Music</button>
+    <button class="cat-btn" onclick="filterTools('image',this)">🖼️ Images & Stock</button>
+    <button class="cat-btn" onclick="filterTools('asian',this)">🌏 Asian Platforms</button>
+  </div>
+
+  <!-- TOOL SEARCH -->
+  <div class="tool-search-wrap">
+    <input type="text" class="tool-search" id="toolSearch" placeholder="🔍 Search tools..." oninput="searchTools(this.value)" />
+  </div>
+
+  <!-- TOOLS GRID -->
+  <div class="tools-grid" id="toolsGrid"></div>
+</div>
+
+<!-- HOW TO -->
+<div class="howto">
+  <div class="section-head">
+    <h2>How to Download</h2>
+    <p>4 simple steps to download any video</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Copy URL</div>
+      <div class="step-desc">Go to the video platform and copy the link from your browser or share button.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Paste & Fetch</div>
+      <div class="step-desc">Paste the URL in the box above and click Fetch to load video information.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Pick Quality</div>
+      <div class="step-desc">Choose your preferred resolution — 144p all the way up to 4K Ultra HD.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-title">Download!</div>
+      <div class="step-desc">Click Download and save the video to your device instantly.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Vid<span>Snap</span></div>
+    <div class="footer-links">
+      <a href="#">Home</a>
+      <a href="#">About Us</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">DMCA Notice</a>
+      <a href="#">Contact</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="footer-note">
+      © 2025 VidSnap — For personal use only. We do not host any videos.<br>
+      Please respect copyright laws and platform terms of service.
+    </div>
+  </div>
+</footer>
+
+</div><!-- end wrap -->
+
+<!-- AD OVERLAY -->
+<div class="ad-overlay" id="adOverlay">
+  <div class="ad-box">
+    <div class="ad-head">
+      <h3>⬇ Preparing Your Download</h3>
+      <span class="ad-timer-badge" id="adTimer">5s</span>
+    </div>
+    <div class="ad-body">
+      <div class="ad-slot">
+        <div class="ad-slot-icon">📢</div>
+        <div class="ad-slot-title">Advertisement</div>
+        <div class="ad-slot-sub">Google AdSense Ad will appear here</div>
+      </div>
+      <div class="ad-prog"><div class="ad-prog-fill" id="adFill"></div></div>
+      <div class="ad-info">Please wait <strong id="adCount">5</strong> seconds...</div>
+      <button class="btn-skip" id="skipBtn" disabled onclick="skipAd()">⏳ Please wait...</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// TOOLS DATA
+// ============================================================
+const TOOLS = [
+  // SOCIAL MEDIA
+  { id:'youtube',    name:'YouTube Downloader',     icon:'▶️',  color:'#ff0000', bg:'rgba(255,0,0,0.08)',      cat:'social',  badge:'hd',    desc:'Download YouTube videos in 4K, 1080p, 720p or extract MP3 audio.',   patterns:['youtube.com','youtu.be'] },
+  { id:'tiktok',     name:'TikTok Downloader',      icon:'🎵',  color:'#00f2ea', bg:'rgba(0,242,234,0.07)',    cat:'social',  badge:'free',  desc:'Download TikTok videos with or without watermark.',                   patterns:['tiktok.com','vm.tiktok'] },
+  { id:'instagram',  name:'Instagram Downloader',   icon:'📸',  color:'#e1306c', bg:'rgba(225,48,108,0.07)',   cat:'social',  badge:'free',  desc:'Download Instagram Reels, posts and Stories.',                        patterns:['instagram.com'] },
+  { id:'facebook',   name:'Facebook Downloader',    icon:'👥',  color:'#1877f2', bg:'rgba(24,119,242,0.07)',   cat:'social',  badge:'hd',    desc:'Download public Facebook videos in HD quality.',                      patterns:['facebook.com','fb.watch','fb.com'] },
+  { id:'twitter',    name:'Twitter / X Downloader', icon:'🐦',  color:'#1da1f2', bg:'rgba(29,161,242,0.07)',   cat:'social',  badge:'free',  desc:'Download videos and GIFs from Twitter and X.',                       patterns:['twitter.com','x.com','t.co'] },
+  { id:'linkedin',   name:'LinkedIn Downloader',    icon:'💼',  color:'#0077b5', bg:'rgba(0,119,181,0.07)',    cat:'social',  badge:'free',  desc:'Download LinkedIn videos and presentations.',                         patterns:['linkedin.com'] },
+  { id:'pinterest',  name:'Pinterest Downloader',   icon:'📌',  color:'#e60023', bg:'rgba(230,0,35,0.07)',     cat:'social',  badge:'free',  desc:'Download Pinterest videos and animated GIFs.',                       patterns:['pinterest.com','pin.it'] },
+  { id:'reddit',     name:'Reddit Downloader',      icon:'🤖',  color:'#ff4500', bg:'rgba(255,69,0,0.07)',     cat:'social',  badge:'free',  desc:'Download Reddit videos with audio merged.',                           patterns:['reddit.com','redd.it','v.redd.it'] },
+  { id:'snapchat',   name:'Snapchat Downloader',    icon:'👻',  color:'#fffc00', bg:'rgba(255,252,0,0.06)',    cat:'social',  badge:'free',  desc:'Download Snapchat Spotlight videos.',                                 patterns:['snapchat.com'] },
+
+  // VIDEO PLATFORMS
+  { id:'dailymotion',name:'Dailymotion Downloader', icon:'📹',  color:'#0066dc', bg:'rgba(0,102,220,0.07)',    cat:'video',   badge:'hd',    desc:'Download Dailymotion videos in multiple resolutions.',                patterns:['dailymotion.com','dai.ly'] },
+  { id:'vimeo',      name:'Vimeo Downloader',       icon:'🎞️',  color:'#1ab7ea', bg:'rgba(26,183,234,0.07)',   cat:'video',   badge:'hd',    desc:'Download Vimeo videos and short films in HD.',                       patterns:['vimeo.com'] },
+  { id:'twitch',     name:'Twitch Clip Downloader', icon:'🎮',  color:'#9147ff', bg:'rgba(145,71,255,0.07)',   cat:'video',   badge:'hd',    desc:'Download Twitch clips and VOD highlights.',                           patterns:['twitch.tv','clips.twitch.tv'] },
+  { id:'rumble',     name:'Rumble Downloader',      icon:'🔊',  color:'#85c742', bg:'rgba(133,199,66,0.07)',   cat:'video',   badge:'free',  desc:'Download Rumble videos in available quality.',                        patterns:['rumble.com'] },
+  { id:'bitchute',   name:'Bitchute Downloader',    icon:'📡',  color:'#f26522', bg:'rgba(242,101,34,0.07)',   cat:'video',   badge:'free',  desc:'Download Bitchute videos easily.',                                    patterns:['bitchute.com'] },
+  { id:'9gag',       name:'9GAG Downloader',        icon:'😂',  color:'#ffcc00', bg:'rgba(255,204,0,0.06)',    cat:'video',   badge:'free',  desc:'Download 9GAG videos and funny clips.',                               patterns:['9gag.com'] },
+  { id:'espn',       name:'ESPN Video Downloader',  icon:'🏆',  color:'#d50a0a', bg:'rgba(213,10,10,0.07)',    cat:'video',   badge:'hd',    desc:'Download ESPN sports highlights and clips.',                          patterns:['espn.com'] },
+  { id:'buzzfeed',   name:'Buzzfeed Downloader',    icon:'🐝',  color:'#ee3322', bg:'rgba(238,51,34,0.07)',    cat:'video',   badge:'free',  desc:'Download Buzzfeed videos and listicle clips.',                        patterns:['buzzfeed.com'] },
+  { id:'flickr',     name:'Flickr Downloader',      icon:'📷',  color:'#ff0084', bg:'rgba(255,0,132,0.07)',    cat:'image',   badge:'image', desc:'Download Flickr photos and short videos.',                            patterns:['flickr.com'] },
+  { id:'telegram',   name:'Telegram Downloader',    icon:'✈️',  color:'#0088cc', bg:'rgba(0,136,204,0.07)',    cat:'social',  badge:'free',  desc:'Download videos from public Telegram channels.',                      patterns:['t.me','telegram.me'] },
+  { id:'vlive',      name:'Vlive Downloader',       icon:'💜',  color:'#8b52ff', bg:'rgba(139,82,255,0.07)',   cat:'video',   badge:'free',  desc:'Download Vlive Korean artist broadcasts.',                            patterns:['vlive.tv'] },
+  { id:'tumblr',     name:'Tumblr Downloader',      icon:'🌀',  color:'#35465c', bg:'rgba(53,70,92,0.2)',      cat:'social',  badge:'free',  desc:'Download Tumblr videos and GIF posts.',                               patterns:['tumblr.com'] },
+  { id:'ifunny',     name:'iFunny Downloader',      icon:'😄',  color:'#f5a623', bg:'rgba(245,166,35,0.07)',   cat:'social',  badge:'free',  desc:'Download iFunny meme videos and clips.',                              patterns:['ifunny.co'] },
+  { id:'sharechat',  name:'ShareChat Downloader',   icon:'💬',  color:'#ff6347', bg:'rgba(255,99,71,0.07)',    cat:'asian',   badge:'free',  desc:'Download ShareChat videos in original quality.',                      patterns:['sharechat.com'] },
+  { id:'truthsocial',name:'Truth Social Downloader',icon:'🇺🇸', color:'#f01716', bg:'rgba(240,23,22,0.07)',    cat:'social',  badge:'free',  desc:'Download Truth Social video posts.',                                  patterns:['truthsocial.com'] },
+
+  // MUSIC
+  { id:'soundcloud', name:'SoundCloud Downloader',  icon:'🔊',  color:'#f50',    bg:'rgba(255,85,0,0.07)',     cat:'music',   badge:'music', desc:'Download SoundCloud tracks and playlists as MP3.',                    patterns:['soundcloud.com'] },
+  { id:'bandcamp',   name:'Bandcamp Downloader',    icon:'🎸',  color:'#1da0c3', bg:'rgba(29,160,195,0.07)',   cat:'music',   badge:'music', desc:'Download Bandcamp music and albums.',                                 patterns:['bandcamp.com'] },
+  { id:'gaana',      name:'Gaana Music Downloader', icon:'🎶',  color:'#e72c30', bg:'rgba(231,44,48,0.07)',    cat:'music',   badge:'music', desc:'Download Gaana songs and playlists.',                                 patterns:['gaana.com'] },
+
+  // ASIAN PLATFORMS
+  { id:'douyin',     name:'Douyin Downloader',      icon:'🎭',  color:'#fe2c55', bg:'rgba(254,44,85,0.07)',    cat:'asian',   badge:'free',  desc:'Download Douyin (Chinese TikTok) videos without watermark.',          patterns:['douyin.com'] },
+  { id:'bilibili',   name:'Bilibili Downloader',    icon:'📺',  color:'#00a1d6', bg:'rgba(0,161,214,0.07)',    cat:'asian',   badge:'hd',    desc:'Download Bilibili videos and anime.',                                 patterns:['bilibili.com','b23.tv'] },
+  { id:'hotstar',    name:'Hotstar Downloader',     icon:'⭐',  color:'#1f80e0', bg:'rgba(31,128,224,0.07)',   cat:'asian',   badge:'hd',    desc:'Download Hotstar / Disney+ Hotstar videos.',                          patterns:['hotstar.com','disneyplus.com'] },
+  { id:'moj',        name:'Moj Video Downloader',   icon:'🌟',  color:'#fe5f55', bg:'rgba(254,95,85,0.07)',    cat:'asian',   badge:'free',  desc:'Download Moj short videos from India.',                               patterns:['mojapp.in'] },
+  { id:'mxtakatak',  name:'MX TakaTak Downloader',  icon:'🎪',  color:'#ff6b35', bg:'rgba(255,107,53,0.07)',   cat:'asian',   badge:'free',  desc:'Download MX TakaTak short videos.',                                  patterns:['mxtakatak.com'] },
+  { id:'likee',      name:'Likee Downloader',       icon:'❤️',  color:'#f5365c', bg:'rgba(245,54,92,0.07)',    cat:'asian',   badge:'free',  desc:'Download Likee videos without watermark.',                            patterns:['likee.video','l.likee.video'] },
+  { id:'roposo',     name:'Roposo Downloader',      icon:'🎨',  color:'#7b5bf7', bg:'rgba(123,91,247,0.07)',   cat:'asian',   badge:'free',  desc:'Download Roposo videos and content.',                                 patterns:['roposo.com'] },
+  { id:'starmaker',  name:'StarMaker Downloader',   icon:'🎤',  color:'#ff4081', bg:'rgba(255,64,129,0.07)',   cat:'asian',   badge:'music', desc:'Download StarMaker karaoke video recordings.',                        patterns:['starmaker.com'] },
+  { id:'wesing',     name:'WeSing Downloader',      icon:'🎼',  color:'#1296db', bg:'rgba(18,150,219,0.07)',   cat:'asian',   badge:'music', desc:'Download WeSing karaoke video clips.',                                patterns:['wesing.com'] },
+  { id:'smule',      name:'Smule Downloader',       icon:'🎹',  color:'#8b1cf1', bg:'rgba(139,28,241,0.07)',   cat:'music',   badge:'music', desc:'Download Smule singing and duet recordings.',                         patterns:['smule.com'] },
+  { id:'vk',         name:'VK Video Downloader',    icon:'🌐',  color:'#4a76a8', bg:'rgba(74,118,168,0.07)',   cat:'social',  badge:'hd',    desc:'Download VK.com videos in full quality.',                             patterns:['vk.com'] },
+  { id:'okru',       name:'OK.ru Downloader',       icon:'🆗',  color:'#ed812b', bg:'rgba(237,129,43,0.07)',   cat:'social',  badge:'free',  desc:'Download OK.ru (Odnoklassniki) videos.',                              patterns:['ok.ru'] },
+  { id:'snackvideo', name:'Snack Video Downloader', icon:'🍿',  color:'#ffb300', bg:'rgba(255,179,0,0.07)',    cat:'asian',   badge:'free',  desc:'Download Snack Video short clips.',                                   patterns:['snackvideo.com'] },
+  { id:'blogger',    name:'Blogger Downloader',     icon:'✍️',  color:'#f57c00', bg:'rgba(245,124,0,0.07)',    cat:'video',   badge:'free',  desc:'Download videos embedded in Blogger posts.',                          patterns:['blogspot.com','blogger.com'] },
+  { id:'onlyfans',   name:'OnlyFans Downloader',    icon:'💎',  color:'#00aff0', bg:'rgba(0,175,240,0.07)',    cat:'social',  badge:'free',  desc:'Download your own OnlyFans purchased content.',                       patterns:['onlyfans.com'] },
+
+  // IMAGE / STOCK
+  { id:'gettyimg',   name:'Getty Images Downloader',icon:'🖼️',  color:'#c8102e', bg:'rgba(200,16,46,0.07)',    cat:'image',   badge:'image', desc:'Download Getty Images for personal preview use.',                     patterns:['gettyimages.com'] },
+  { id:'getty',      name:'GettyVideo Downloader',  icon:'🎥',  color:'#c8102e', bg:'rgba(200,16,46,0.06)',    cat:'image',   badge:'image', desc:'Download Getty stock video previews.',                                patterns:['gettyimages.com/videos'] },
+  { id:'alamy',      name:'Alamy Downloader',       icon:'📸',  color:'#006600', bg:'rgba(0,102,0,0.07)',      cat:'image',   badge:'image', desc:'Download Alamy stock photo previews.',                                patterns:['alamy.com'] },
+  { id:'istock',     name:'iStock Downloader',      icon:'🏷️',  color:'#d0021b', bg:'rgba(208,2,27,0.07)',     cat:'image',   badge:'image', desc:'Download iStock watermarked preview images.',                         patterns:['istockphoto.com'] },
+  { id:'storyblocks',name:'Story Blocks Downloader',icon:'🎬',  color:'#00c4cc', bg:'rgba(0,196,204,0.07)',    cat:'image',   badge:'image', desc:'Download Storyblocks stock video previews.',                          patterns:['storyblocks.com','videoblocks.com'] },
+  { id:'artgrid',    name:'Artgrid Downloader',     icon:'🎞️',  color:'#ff6b6b', bg:'rgba(255,107,107,0.07)',  cat:'image',   badge:'image', desc:'Download Artgrid video previews.',                                    patterns:['artgrid.io'] },
+  { id:'artlist',    name:'Artlist Downloader',     icon:'🎵',  color:'#7c4dff', bg:'rgba(124,77,255,0.07)',   cat:'image',   badge:'music', desc:'Download Artlist music and SFX previews.',                            patterns:['artlist.io'] },
+  { id:'epidemic',   name:'Epidemic Sound',         icon:'🔉',  color:'#1db954', bg:'rgba(29,185,84,0.07)',    cat:'music',   badge:'music', desc:'Preview and download Epidemic Sound tracks.',                         patterns:['epidemicsound.com'] },
+  { id:'eyeem',      name:'EyeEM Downloader',       icon:'👁️',  color:'#3d5a80', bg:'rgba(61,90,128,0.1)',     cat:'image',   badge:'image', desc:'Download EyeEM stock photo previews.',                                patterns:['eyeem.com'] },
+  { id:'shutterstock',name:'Shutterstock Downloader',icon:'📷', color:'#ee2323', bg:'rgba(238,35,35,0.07)',    cat:'image',   badge:'image', desc:'Download Shutterstock watermarked preview images.',                   patterns:['shutterstock.com'] },
+];
+
+// Badge label map
+const BADGE_LABELS = { free:'FREE', hd:'HD', music:'MUSIC', image:'IMAGE', hot:'HOT' };
+const BADGE_CLASS  = { free:'badge-free', hd:'badge-hd', music:'badge-music', image:'badge-image', hot:'badge-hot' };
+
+// ============================================================
+// RENDER TOOLS
+// ============================================================
+let currentCat = 'all';
+let currentSearch = '';
+let activeToolId = null;
+
+function renderTools() {
+  const grid = document.getElementById('toolsGrid');
+  const q = currentSearch.toLowerCase();
+
+  let filtered = TOOLS.filter(t => {
+    const matchCat = currentCat === 'all' || t.cat === currentCat;
+    const matchQ = !q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || t.cat.includes(q);
+    return matchCat && matchQ;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="no-results"><div class="no-results-icon">🔍</div><p>No tools found for "<strong>${q}</strong>"</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(t => `
+    <div class="tool-card ${activeToolId === t.id ? 'active-tool' : ''}"
+      style="--card-color:${t.color};"
+      onclick="selectTool('${t.id}')"
+      id="card-${t.id}"
+    >
+      <div class="tool-top">
+        <div class="tool-icon" style="background:${t.bg};">${t.icon}</div>
+        <span class="tool-arrow">↗</span>
+      </div>
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-desc">${t.desc}</div>
+      <span class="tool-badge ${BADGE_CLASS[t.badge]}">${BADGE_LABELS[t.badge]}</span>
+    </div>
+  `).join('');
+}
+
+function filterTools(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTools();
+}
+
+function searchTools(val) {
+  currentSearch = val;
+  renderTools();
+}
+
+function selectTool(id) {
+  activeToolId = id;
+  const tool = TOOLS.find(t => t.id === id);
+  if (!tool) return;
+
+  // Update URL input placeholder
+  const input = document.getElementById('urlInput');
+  input.placeholder = `Paste ${tool.name.replace(' Downloader','')} URL here...`;
+  input.value = '';
+  input.focus();
+
+  // Reset result
+  hideResult();
+  hideErr();
+
+  // Update platform chip
+  const chip = document.getElementById('platChip');
+  chip.innerHTML = `${tool.icon} ${tool.name.replace(' Downloader','')}`;
+  chip.className = 'platform-chip detected';
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Re-render cards to show active
+  renderTools();
+}
+
+// ============================================================
+// PLATFORM DETECTION
+// ============================================================
+const urlInput = document.getElementById('urlInput');
+urlInput.addEventListener('input', () => {
+  const v = urlInput.value.trim();
+  hideErr();
+  const chip = document.getElementById('platChip');
+  if (!v) { chip.innerHTML = '🌐 Auto Detect'; chip.className = 'platform-chip'; return; }
+  const t = TOOLS.find(tool => tool.patterns?.some(p => v.includes(p)));
+  if (t) {
+    chip.innerHTML = `${t.icon} ${t.name.replace(' Downloader','')}`;
+    chip.className = 'platform-chip detected';
+    activeToolId = t.id;
+    renderTools();
+  } else if (v.startsWith('http')) {
+    chip.innerHTML = `⚠ Unknown`;
+    chip.className = 'platform-chip';
+  }
+});
+
+urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchVideo(); });
+
+// ============================================================
+// VIDEO QUALITIES
+// ============================================================
+const VQ = [
+  { label:'4K',    detail:'3840×2160', badge:'4k', ext:'mp4' },
+  { label:'1080p', detail:'Full HD',   badge:'hd', ext:'mp4' },
+  { label:'720p',  detail:'HD Ready',  badge:'hd', ext:'mp4' },
+  { label:'480p',  detail:'SD',        badge:'sd', ext:'mp4' },
+  { label:'360p',  detail:'SD',        badge:'sd', ext:'mp4' },
+  { label:'144p',  detail:'Low',       badge:'sd', ext:'mp4' },
+];
+const AQ = [
+  { label:'320kbps', detail:'Hi-Fi',   badge:'au', ext:'mp3' },
+  { label:'192kbps', detail:'Standard',badge:'au', ext:'mp3' },
+  { label:'128kbps', detail:'Normal',  badge:'au', ext:'mp3' },
+];
+
+const BADGE_Q = { '4k':'b4k', 'hd':'bhd', 'sd':'bsd', 'au':'bau' };
+const BADGE_QL = { '4k':'4K', 'hd':'HD', 'sd':'SD', 'au':'Audio' };
+
+let selQuality = null;
+let curFmt = 'video';
+
+function renderQ(list) {
+  selQuality = null;
+  const dlBtn = document.getElementById('dlBtn');
+  dlBtn.disabled = true;
+  dlBtn.textContent = '⬇ Select Quality to Download';
+
+  const grid = document.getElementById('qGrid');
+  grid.innerHTML = list.map((q,i) => `
+    <div class="q-btn" id="qb-${i}" onclick="pickQ(${i})" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
+      <div class="q-res">${q.label}</div>
+      <div class="q-detail">${q.detail} · ${q.ext.toUpperCase()}</div>
+      <div><span class="q-badge ${BADGE_Q[q.badge]||'bsd'}">${BADGE_QL[q.badge]||'SD'}</span></div>
+    </div>
+  `).join('');
+
+  list.forEach((_,i) => setTimeout(() => {
+    const el = document.getElementById('qb-'+i);
+    if (el) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }
+  }, 20 + i*60));
+}
+
+function pickQ(i) {
+  const list = curFmt === 'video' ? VQ : AQ;
+  document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('qb-'+i)?.classList.add('sel');
+  selQuality = list[i];
+  const dlBtn = document.getElementById('dlBtn');
+  dlBtn.disabled = false;
+  dlBtn.innerHTML = `⬇ Download ${selQuality.label} ${selQuality.ext.toUpperCase()}`;
+}
+
+function switchFmt(fmt, btn) {
+  curFmt = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderQ(fmt === 'video' ? VQ : AQ);
+}
+
+// ============================================================
+// FETCH VIDEO
+// ============================================================
+const RAPIDAPI_KEY = 'YOUR_RAPIDAPI_KEY_HERE'; // 👈 Apni key yahan lagao
+
+async function fetchVideo() {
+  const url = urlInput.value.trim();
+  if (!url) { showErr('Please paste a video URL first!'); return; }
+  if (!url.startsWith('http')) { showErr('Please enter a valid URL starting with https://'); return; }
+
+  setLoading(true);
+  hideErr();
+  hideResult();
+
+  try {
+    if (RAPIDAPI_KEY !== 'YOUR_RAPIDAPI_KEY_HERE') {
+      await realFetch(url);
+    } else {
+      await demoFetch(url);
+    }
+  } catch(e) {
+    showErr('Could not fetch video. Please check the URL and try again.');
+    console.error(e);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function realFetch(url) {
+  const host = 'all-video-downloader1.p.rapidapi.com';
+  const res = await fetch(`https://${host}/dl?url=${encodeURIComponent(url)}`, {
+    headers: { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': host }
+  });
+  if (!res.ok) throw new Error('API '+res.status);
+  const data = await res.json();
+  showResult({ title: data.title || 'Video', thumb: data.thumbnail || '', duration: data.duration });
+  if (data.formats?.length) renderApiFormats(data.formats);
+  else renderQ(VQ);
+  document.getElementById('resultCard').classList.add('on');
+}
+
+function renderApiFormats(fmts) {
+  const grid = document.getElementById('qGrid');
+  selQuality = null;
+  grid.innerHTML = fmts.map((f,i) => {
+    const badge = f.quality_label?.includes('4K') ? '4k' : f.quality_label?.match(/1080|720/) ? 'hd' : 'sd';
+    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${f.url||''}','${f.ext||'mp4'}','${f.quality_label||'HD'}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
+      <div class="q-res">${f.quality_label||f.format_id||'HD'}</div>
+      <div class="q-detail">${(f.ext||'mp4').toUpperCase()}</div>
+      <div><span class="q-badge ${BADGE_Q[badge]||'bsd'}">${BADGE_QL[badge]||'SD'}</span></div>
+    </div>`;
+  }).join('');
+  fmts.forEach((_,i) => setTimeout(() => {
+    const el = document.getElementById('qb-'+i);
+    if(el){el.style.opacity='1';el.style.transform='translateY(0)';}
+  }, 20+i*60));
+}
+
+function pickQApi(i, url, ext, label) {
+  document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('qb-'+i)?.classList.add('sel');
+  selQuality = { label, ext, url };
+  const dlBtn = document.getElementById('dlBtn');
+  dlBtn.disabled = false;
+  dlBtn.innerHTML = `⬇ Download ${label} ${ext.toUpperCase()}`;
+}
+
+async function demoFetch(url) {
+  await new Promise(r => setTimeout(r, 1600));
+  const tool = TOOLS.find(t => t.patterns?.some(p => url.includes(p)));
+  const titles = {
+    youtube:'Amazing YouTube Video — Watch Till The End!',
+    tiktok:'Viral TikTok Clip 🔥 — You Won\'t Believe This',
+    instagram:'Instagram Reel — Trending Now',
+    facebook:'Facebook Public Video',
+    twitter:'Twitter/X Viral Video',
+    default:'Sample Video — Add API Key to Enable'
+  };
+  showResult({
+    title: titles[tool?.id] || titles.default,
+    thumb: '',
+    duration: '4:27',
+    platform: tool,
+    isDemo: true
+  });
+  renderQ(VQ);
+  document.getElementById('resultCard').classList.add('on');
+}
+
+function showResult({ title, thumb, duration, platform, isDemo }) {
+  document.getElementById('vTitle').textContent = title;
+  const tw = document.getElementById('thumbWrap');
+  if (thumb) {
+    tw.innerHTML = `<img src="${thumb}" alt="thumb" onerror="this.parentElement.innerHTML='🎬'"/>`;
+  } else {
+    tw.innerHTML = platform?.icon || '🎬';
+  }
+  const chips = document.getElementById('vChips');
+  chips.innerHTML = '';
+  if (duration) chips.innerHTML += `<span class="chip chip-cyan">⏱ ${duration}</span>`;
+  if (platform) chips.innerHTML += `<span class="chip chip-green">${platform.icon} ${platform.name.replace(' Downloader','')}</span>`;
+  if (isDemo) chips.innerHTML += `<span class="chip chip-demo">⚙ Demo — Add RapidAPI Key</span>`;
+  document.getElementById('resultCard').classList.add('on');
+}
+
+// ============================================================
+// AD + DOWNLOAD
+// ============================================================
+let adTick = null;
+
+function startDl() {
+  if (!selQuality) return;
+  showAd();
+}
+
+function showAd() {
+  const overlay = document.getElementById('adOverlay');
+  overlay.classList.add('on');
+  document.body.style.overflow = 'hidden';
+
+  let left = 5;
+  document.getElementById('adTimer').textContent = left+'s';
+  document.getElementById('adCount').textContent = left;
+  document.getElementById('skipBtn').disabled = true;
+  document.getElementById('skipBtn').className = 'btn-skip';
+  document.getElementById('skipBtn').textContent = '⏳ Please wait...';
+
+  const fill = document.getElementById('adFill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  void fill.offsetWidth;
+  fill.style.transition = `width 5s linear`;
+  setTimeout(() => { fill.style.width = '100%'; }, 30);
+
+  clearInterval(adTick);
+  adTick = setInterval(() => {
+    left--;
+    document.getElementById('adTimer').textContent = left+'s';
+    document.getElementById('adCount').textContent = left;
+    if (left <= 0) {
+      clearInterval(adTick);
+      const btn = document.getElementById('skipBtn');
+      btn.disabled = false;
+      btn.className = 'btn-skip go';
+      btn.textContent = '✓ Continue to Download';
+      document.getElementById('adTimer').textContent = '✓';
+      document.querySelector('.ad-info').innerHTML = '✅ Your download is ready!';
+    }
+  }, 1000);
+}
+
+function skipAd() {
+  clearInterval(adTick);
+  document.getElementById('adOverlay').classList.remove('on');
+  document.body.style.overflow = '';
+  doDownload();
+}
+
+function doDownload() {
+  const prog = document.getElementById('dlProg');
+  prog.classList.add('on');
+  const ext = selQuality?.ext || 'mp4';
+  const label = selQuality?.label || 'HD';
+  document.getElementById('dlName').textContent = `video_${label}.${ext}`;
+
+  if (selQuality?.url) {
+    const a = document.createElement('a');
+    a.href = selQuality.url;
+    a.download = `video_${label}.${ext}`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  let pct = 0;
+  const speeds = ['2.4 MB/s','3.8 MB/s','4.5 MB/s','3.1 MB/s','5.2 MB/s'];
+  const iv = setInterval(() => {
+    pct += Math.random()*7 + 3;
+    if (pct >= 100) {
+      pct = 100;
+      clearInterval(iv);
+      document.getElementById('dlSpd').textContent = '✅ Download Complete!';
+      document.getElementById('dlEta').textContent = '';
+    } else {
+      document.getElementById('dlSpd').textContent = speeds[~~(Math.random()*speeds.length)];
+      document.getElementById('dlEta').textContent = `ETA: ${Math.ceil((100-pct)/6)}s`;
+    }
+    document.getElementById('dlPct').textContent = ~~pct+'%';
+    document.getElementById('dlFill').style.width = pct+'%';
+  }, 280);
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function setLoading(on) {
+  const btn = document.getElementById('goBtn');
+  const strip = document.getElementById('loadStrip');
+  if (on) {
+    btn.disabled = true;
+    document.getElementById('goBtnInner').innerHTML = '<div class="spinner"></div> Fetching...';
+    strip.classList.add('on');
+  } else {
+    btn.disabled = false;
+    document.getElementById('goBtnInner').textContent = '⬇ Fetch';
+    strip.classList.remove('on');
+  }
+}
+
+function showErr(msg) {
+  const b = document.getElementById('errBox');
+  document.getElementById('errTxt').textContent = msg;
+  b.classList.add('on');
+}
+function hideErr() { document.getElementById('errBox').classList.remove('on'); }
+function hideResult() {
+  document.getElementById('resultCard').classList.remove('on');
+  document.getElementById('dlProg').classList.remove('on');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderTools();
+</script>
+</body>
+</html>
