@@ -1283,7 +1283,7 @@ function switchFmt(fmt, btn) {
 // ============================================================
 // FETCH VIDEO
 // ============================================================
-const RAPIDAPI_KEY = 'YOUR_RAPIDAPI_KEY_HERE'; // 👈 Apni key yahan lagao
+const RAPIDAPI_KEY = '264e0c752cmsha01e25047a292c2p188c69jsnc37e126ec2ec'; // 👈 Apni key yahan lagao
 
 async function fetchVideo() {
   const url = urlInput.value.trim();
@@ -1309,7 +1309,7 @@ async function fetchVideo() {
 }
 
 async function realFetch(url) {
-  const host = 'all-video-downloader1.p.rapidapi.com';
+  const host = 'all-video-downloader4.p.rapidapi.com';
   const res = await fetch(`https://${host}/dl?url=${encodeURIComponent(url)}`, {
     headers: { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': host }
   });
