@@ -1309,56 +1309,36 @@ async function fetchVideo() {
 }
 
 async function realFetch(url) {
-  const host = 'all-video-downloader4.p.rapidapi.com';
-  const res = await fetch(`https://${host}/download`, {
-    method: 'POST',
+  const host = 'download-all-in-one-ultimate.p.rapidapi.com';
+  const res = await fetch(`https://${host}/autolink?url=${encodeURIComponent(url)}`, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       'x-rapidapi-key': RAPIDAPI_KEY,
       'x-rapidapi-host': host
-    },
-    body: JSON.stringify({ url: url })
+    }
   });
   if (!res.ok) throw new Error('API '+res.status);
   const data = await res.json();
 
-  // Handle different API response formats
+  const title = data.title || 'Video';
+  const thumb = data.thumbnail || '';
+  const duration = data.duration ? String(data.duration) : '';
+
   let formats = [];
-  let title = 'Video';
-  let thumb = '';
-  let duration = '';
-
-  if (data.title) title = data.title;
-  if (data.thumbnail) thumb = data.thumbnail;
-  if (data.duration) duration = data.duration;
-
-  // Format 1: data.formats array
-  if (data.formats?.length) {
-    formats = data.formats;
-  }
-  // Format 2: data.medias array (some APIs use this)
-  else if (data.medias?.length) {
-    formats = data.medias.map(m => ({
-      url: m.url,
-      ext: m.extension || m.ext || 'mp4',
-      quality_label: m.quality || m.label || 'HD'
-    }));
-  }
-  // Format 3: data.links array
-  else if (data.links?.length) {
-    formats = data.links.map(m => ({
-      url: m.url,
-      ext: m.type || 'mp4',
-      quality_label: m.quality || 'HD'
-    }));
-  }
-  // Format 4: direct url in data
-  else if (data.url) {
+  if (data.medias?.length) {
+    formats = data.medias
+      .filter(m => m.url && m.type !== 'multiple')
+      .map(m => ({
+        url: m.url,
+        ext: m.extension || (m.type === 'audio' ? 'mp3' : 'mp4'),
+        quality_label: m.quality === 'hd_no_watermark' ? 'HD (No Watermark)' :
+                       m.quality === 'no_watermark' ? 'HD' :
+                       m.quality === 'watermark' ? 'SD' :
+                       m.quality === 'audio' ? 'Audio MP3' :
+                       m.quality || 'HD'
+      }));
+  } else if (data.url) {
     formats = [{ url: data.url, ext: 'mp4', quality_label: 'HD' }];
-  }
-  // Format 5: data.video direct
-  else if (data.video) {
-    formats = [{ url: data.video, ext: 'mp4', quality_label: 'HD' }];
   }
 
   showResult({ title, thumb, duration });
