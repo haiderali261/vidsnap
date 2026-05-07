@@ -335,6 +335,7 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
   min-width: 90px;
   transition: all 0.2s;
 }
+.platform-chip svg { width: 16px; height: 16px; flex-shrink: 0; vertical-align: middle; }
 .platform-chip.detected { color: var(--accent4); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
 .btn-go {
   background: linear-gradient(135deg, var(--accent), #00b8d4);
@@ -408,8 +409,8 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
 .result-inner { padding: 20px; }
 .video-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
 .video-thumb-wrap {
-  width: 160px; height: 100px;
-  border-radius: 10px;
+  width: 112px; height: 70px;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
   background: var(--surface3);
@@ -417,78 +418,8 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
   align-items: center;
   justify-content: center;
   font-size: 26px;
-  position: relative;
-  cursor: pointer;
 }
 .video-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.video-thumb-wrap video { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-.thumb-play-btn {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.35);
-  border-radius: 10px;
-  transition: background 0.2s;
-  z-index: 2;
-}
-.thumb-play-btn:hover { background: rgba(0,0,0,0.55); }
-.thumb-play-icon {
-  width: 36px; height: 36px;
-  background: rgba(0,229,255,0.92);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 4px 16px rgba(0,229,255,0.4);
-  transition: transform 0.15s;
-}
-.thumb-play-btn:hover .thumb-play-icon { transform: scale(1.12); }
-.thumb-preview-label {
-  position: absolute;
-  bottom: 4px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.6rem;
-  color: rgba(255,255,255,0.75);
-  background: rgba(0,0,0,0.5);
-  padding: 1px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  z-index: 2;
-}
-/* Expanded inline video player */
-.inline-video-player {
-  display: none;
-  margin-bottom: 14px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  position: relative;
-}
-.inline-video-player.on { display: block; animation: fadeUp 0.3s ease; }
-.inline-video-player video {
-  width: 100%;
-  max-height: 280px;
-  display: block;
-  border-radius: 12px;
-}
-.inline-video-close {
-  position: absolute;
-  top: 8px; right: 10px;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 26px; height: 26px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 10;
-  transition: background 0.2s;
-}
-.inline-video-close:hover { background: rgba(239,68,68,0.7); }
 .video-info-col { flex: 1; min-width: 0; }
 .v-title {
   font-family: 'Syne', sans-serif;
@@ -510,6 +441,7 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
 }
 .chip-cyan { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); color: var(--accent); }
 .chip-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: var(--accent4); }
+.chip svg { width: 13px; height: 13px; vertical-align: middle; flex-shrink: 0; }
 .chip-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--accent3); }
 .chip-purple { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); color: #a78bfa; }
 .chip-demo { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--accent3); }
@@ -1162,12 +1094,6 @@ function googleTranslateElementInit() {
           <div class="v-chips" id="vChips"></div>
         </div>
       </div>
-      <!-- Inline Video Preview Player -->
-      <div class="inline-video-player" id="inlinePlayer">
-        <button class="inline-video-close" onclick="closeInlinePlayer()" title="Close">✕</button>
-        <video id="previewVideo" controls playsinline></video>
-      </div>
-
       <div class="fmt-row">
         <button class="fmt-btn active" onclick="switchFmt('video',this)">🎬 Video</button>
         <button class="fmt-btn" onclick="switchFmt('audio',this)">🎵 Audio</button>
@@ -1473,7 +1399,7 @@ function selectTool(id) {
 
   // Update platform chip
   const chip = document.getElementById('platChip');
-  chip.innerHTML = `${tool.icon} ${tool.name.replace(' Downloader','')}`;
+  chip.innerHTML = getChipHTML(tool);
   chip.className = 'platform-chip detected';
 
   // Scroll to top
@@ -1483,6 +1409,10 @@ function selectTool(id) {
   renderTools();
 }
 
+
+function getChipHTML(tool) {
+  return `<span style="display:inline-flex;align-items:center;width:16px;height:16px;overflow:hidden">${tool.svgIcon || tool.icon}</span> ${tool.name.replace(' Downloader','')}`;
+}
 // ============================================================
 // PLATFORM DETECTION
 // ============================================================
@@ -1494,7 +1424,7 @@ urlInput.addEventListener('input', () => {
   if (!v) { chip.innerHTML = '🌐 Auto Detect'; chip.className = 'platform-chip'; return; }
   const t = TOOLS.find(tool => tool.patterns?.some(p => v.includes(p)));
   if (t) {
-    chip.innerHTML = `${t.icon} ${t.name.replace(' Downloader','')}`;
+    chip.innerHTML = getChipHTML(t);
     chip.className = 'platform-chip detected';
     activeToolId = t.id;
     renderTools();
@@ -1628,10 +1558,7 @@ async function realFetch(url) {
     formats = [{ url: data.url, ext: 'mp4', quality_label: 'HD' }];
   }
 
-  // Collect all video URLs for preview
-  const videoUrls = formats.filter(f => f.ext !== 'mp3' && f.url).map(f => f.url);
-
-  showResult({ title, thumb, duration, videoUrls });
+  showResult({ title, thumb, duration });
   if (formats.length) renderApiFormats(formats);
   else renderQ(VQ);
   document.getElementById('resultCard').classList.add('on');
@@ -1678,28 +1605,10 @@ function renderApiFormats(fmts) {
 function pickQApi(i, safeUrl, ext, label) {
   document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
   document.getElementById('qb-'+i)?.classList.add('sel');
-  const decodedUrl = decodeURIComponent(safeUrl);
-  selQuality = { label, ext, url: decodedUrl };
+  selQuality = { label, ext, url: decodeURIComponent(safeUrl) };
   const dlBtn = document.getElementById('dlBtn');
   dlBtn.disabled = false;
   dlBtn.innerHTML = `⬇ Download ${label} ${ext.toUpperCase()}`;
-  // Update preview URL if it's a video
-  if (ext !== 'mp3' && !_previewVideoUrls.includes(decodedUrl)) {
-    _previewVideoUrls = [decodedUrl, ..._previewVideoUrls];
-    // Update thumb overlay if not already showing play button
-    const tw = document.getElementById('thumbWrap');
-    if (!tw.querySelector('.thumb-play-btn')) {
-      const overlay = document.createElement('div');
-      overlay.className = 'thumb-play-btn';
-      overlay.onclick = openInlinePlayer;
-      overlay.innerHTML = '<div class="thumb-play-icon">▶</div>';
-      const lbl = document.createElement('span');
-      lbl.className = 'thumb-preview-label';
-      lbl.textContent = '▶ Preview';
-      tw.appendChild(overlay);
-      tw.appendChild(lbl);
-    }
-  }
 }
 
 async function demoFetch(url) {
@@ -1718,59 +1627,26 @@ async function demoFetch(url) {
     thumb: '',
     duration: '4:27',
     platform: tool,
-    isDemo: true,
-    videoUrls: [] // No real video in demo mode
+    isDemo: true
   });
   renderQ(VQ);
   document.getElementById('resultCard').classList.add('on');
 }
 
-// Store video preview URLs globally for inline player
-let _previewVideoUrls = [];
-
-function showResult({ title, thumb, duration, platform, isDemo, videoUrls }) {
+function showResult({ title, thumb, duration, platform, isDemo }) {
   document.getElementById('vTitle').textContent = title;
-  _previewVideoUrls = videoUrls || [];
   const tw = document.getElementById('thumbWrap');
-  const hasPreview = _previewVideoUrls.length > 0;
-
-  const playOverlay = hasPreview ? `
-    <div class="thumb-play-btn" onclick="openInlinePlayer()">
-      <div class="thumb-play-icon">▶</div>
-    </div>
-    <span class="thumb-preview-label">▶ Preview</span>` : '';
-
   if (thumb) {
-    tw.innerHTML = `<img src="${thumb}" alt="thumb"/>${playOverlay}`;
+    tw.innerHTML = `<img src="${thumb}" alt="thumb" onerror="this.parentElement.innerHTML='🎬'"/>`;
   } else {
-    tw.innerHTML = `<span style="font-size:26px">${platform?.icon || '🎬'}</span>${playOverlay}`;
+    tw.innerHTML = platform?.icon || '🎬';
   }
-
   const chips = document.getElementById('vChips');
   chips.innerHTML = '';
   if (duration) chips.innerHTML += `<span class="chip chip-cyan">⏱ ${duration}</span>`;
-  if (platform) chips.innerHTML += `<span class="chip chip-green">${platform.icon} ${platform.name.replace(' Downloader','')}</span>`;
+  if (platform) chips.innerHTML += `<span class="chip chip-green" style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-flex;width:13px;height:13px;overflow:hidden">${platform.svgIcon||platform.icon}</span>${platform.name.replace(' Downloader','')}</span>`;
   if (isDemo) chips.innerHTML += `<span class="chip chip-demo">⚙ Demo — Add RapidAPI Key</span>`;
   document.getElementById('resultCard').classList.add('on');
-  closeInlinePlayer();
-}
-
-function openInlinePlayer() {
-  if (!_previewVideoUrls.length) return;
-  const player = document.getElementById('inlinePlayer');
-  const video = document.getElementById('previewVideo');
-  video.src = _previewVideoUrls[0];
-  player.classList.add('on');
-  video.play().catch(() => {});
-  // Scroll to player
-  player.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function closeInlinePlayer() {
-  const player = document.getElementById('inlinePlayer');
-  const video = document.getElementById('previewVideo');
-  if (player) player.classList.remove('on');
-  if (video) { video.pause(); video.src = ''; }
 }
 
 // ============================================================
@@ -1844,38 +1720,15 @@ function doDownload() {
   document.getElementById('dlName').textContent = `video_${label}.${ext}`;
 
   if (selQuality?.url) {
-    const ext = selQuality?.ext || 'mp4';
-    const label = selQuality?.label || 'HD';
-    const filename = `video_${label}.${ext}`;
-
-    // Try fetch + blob first (forces real download, no new tab)
-    fetch(selQuality.url)
-      .then(res => {
-        if (!res.ok) throw new Error('fetch failed');
-        return res.blob();
-      })
-      .then(blob => {
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { URL.revokeObjectURL(blobUrl); document.body.removeChild(a); }, 2000);
-      })
-      .catch(() => {
-        // Fallback: direct anchor with download attribute
-        const a = document.createElement('a');
-        a.href = selQuality.url;
-        a.download = filename;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => document.body.removeChild(a), 1000);
-      });
-
-    // Reset body overflow
+    const a = document.createElement('a');
+    a.href = selQuality.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 1000);
+    // Also reset body overflow just in case
     document.body.style.overflow = '';
   }
 
