@@ -116,7 +116,107 @@ nav {
   letter-spacing: -0.02em;
 }
 .logo-name span { color: var(--accent); }
-.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+
+/* Theme Toggle */
+.theme-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.theme-btn:hover { background: var(--surface2); border-color: var(--accent); }
+
+/* Translator */
+.translator-wrap {
+  position: relative;
+}
+.translator-btn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.translator-btn:hover { background: var(--surface2); border-color: var(--accent); }
+.translator-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 180px;
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.translator-dropdown.open { display: block; }
+.lang-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.lang-item:hover { background: var(--surface2); }
+.lang-item.active { background: rgba(0,242,234,0.1); color: var(--accent); }
+.lang-flag { font-size: 18px; line-height: 1; }
+
+/* Light theme */
+body.light-theme {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface2: #e8eaed;
+  --surface3: #dde1e7;
+  --border: #d1d5db;
+  --border2: #c4c9d4;
+  --text: #111827;
+  --fg: #111827;
+  --muted: #4b5563;
+  --muted2: #6b7280;
+  --glow: rgba(0,180,200,0.08);
+}
+body.light-theme nav { background: rgba(255,255,255,0.97); border-bottom-color: #e5e7eb; }
+body.light-theme .tool-card { background: #ffffff !important; border-color: #e5e7eb !important; }
+body.light-theme .tool-name { color: #111827 !important; }
+body.light-theme .tool-desc { color: #4b5563 !important; }
+body.light-theme h1, body.light-theme h2, body.light-theme h3 { color: #111827 !important; }
+body.light-theme p { color: #4b5563; }
+body.light-theme .hero { background: linear-gradient(180deg, #e8f4fd 0%, #f0f2f5 100%) !important; }
+body.light-theme .url-bar { background: #ffffff; border-color: #d1d5db; }
+body.light-theme .url-bar input { color: #111827 !important; }
+body.light-theme .url-bar input::placeholder { color: #9ca3af; }
+body.light-theme .stats-bar { background: #ffffff; border-color: #e5e7eb; }
+body.light-theme .stat-val { color: #111827 !important; }
+body.light-theme .stat-label { color: #6b7280; }
+body.light-theme .cat-btn { background: #f3f4f6; border-color: #e5e7eb; color: #374151; }
+body.light-theme .cat-btn.active { background: #00e5ff; color: #000; }
+body.light-theme .tools-group-header { background: #f9fafb !important; }
+body.light-theme .tools-group-title { color: #111827 !important; }
+body.light-theme .tools-group-sub { color: #6b7280 !important; }
+body.light-theme .logo-name { color: #111827; }
+body.light-theme .nav-count { color: #374151; }
+body.light-theme .section-head h2 { color: #111827 !important; }
+body.light-theme .section-head p { color: #4b5563 !important; }
+body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; color: #111827; }
 .nav-tag {
   background: rgba(16,185,129,0.1);
   border: 1px solid rgba(16,185,129,0.25);
@@ -914,8 +1014,47 @@ footer {
   <div class="nav-right">
     <span class="nav-tag">● Free</span>
     <span class="nav-count"><strong>50+</strong> Tools</span>
+
+    <!-- Translator -->
+    <div class="translator-wrap" id="translatorWrap">
+      <button class="translator-btn" onclick="toggleTranslator(event)" title="Change Language">
+        🌐 <span id="currentLang">EN</span> ▾
+      </button>
+      <div class="translator-dropdown" id="translatorDropdown">
+        <div class="lang-item active" onclick="setLang('en','EN','🇺🇸')"><span class="lang-flag">🇺🇸</span> English</div>
+        <div class="lang-item" onclick="setLang('ur','UR','🇵🇰')"><span class="lang-flag">🇵🇰</span> اردو</div>
+        <div class="lang-item" onclick="setLang('hi','HI','🇮🇳')"><span class="lang-flag">🇮🇳</span> हिंदी</div>
+        <div class="lang-item" onclick="setLang('ar','AR','🇸🇦')"><span class="lang-flag">🇸🇦</span> العربية</div>
+        <div class="lang-item" onclick="setLang('zh-CN','ZH','🇨🇳')"><span class="lang-flag">🇨🇳</span> 中文</div>
+        <div class="lang-item" onclick="setLang('fr','FR','🇫🇷')"><span class="lang-flag">🇫🇷</span> Français</div>
+        <div class="lang-item" onclick="setLang('es','ES','🇪🇸')"><span class="lang-flag">🇪🇸</span> Español</div>
+        <div class="lang-item" onclick="setLang('de','DE','🇩🇪')"><span class="lang-flag">🇩🇪</span> Deutsch</div>
+        <div class="lang-item" onclick="setLang('pt','PT','🇧🇷')"><span class="lang-flag">🇧🇷</span> Português</div>
+        <div class="lang-item" onclick="setLang('ru','RU','🇷🇺')"><span class="lang-flag">🇷🇺</span> Русский</div>
+        <div class="lang-item" onclick="setLang('ja','JA','🇯🇵')"><span class="lang-flag">🇯🇵</span> 日本語</div>
+        <div class="lang-item" onclick="setLang('ko','KO','🇰🇷')"><span class="lang-flag">🇰🇷</span> 한국어</div>
+        <div class="lang-item" onclick="setLang('tr','TR','🇹🇷')"><span class="lang-flag">🇹🇷</span> Türkçe</div>
+        <div class="lang-item" onclick="setLang('id','ID','🇮🇩')"><span class="lang-flag">🇮🇩</span> Bahasa Indonesia</div>
+        <div class="lang-item" onclick="setLang('th','TH','🇹🇭')"><span class="lang-flag">🇹🇭</span> ภาษาไทย</div>
+        <div class="lang-item" onclick="setLang('vi','VI','🇻🇳')"><span class="lang-flag">🇻🇳</span> Tiếng Việt</div>
+        <div class="lang-item" onclick="setLang('bn','BN','🇧🇩')"><span class="lang-flag">🇧🇩</span> বাংলা</div>
+        <div class="lang-item" onclick="setLang('fa','FA','🇮🇷')"><span class="lang-flag">🇮🇷</span> فارسی</div>
+      </div>
+    </div>
+
+    <!-- Dark/Light Theme -->
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
   </div>
 </nav>
+
+<!-- Google Translate Element (hidden) -->
+<div id="google_translate_element" style="display:none"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage:'en'}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <!-- HERO -->
 <div class="hero">
@@ -1634,9 +1773,75 @@ function hideResult() {
 }
 
 // ============================================================
+// THEME TOGGLE
+// ==========================================
+function toggleTheme() {
+  const btn = document.getElementById('themeBtn');
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  btn.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('vidsnap-theme', isLight ? 'light' : 'dark');
+}
+
+// ==========================================
+// TRANSLATOR
+// ==========================================
+function toggleTranslator(e) {
+  e.stopPropagation();
+  document.getElementById('translatorDropdown').classList.toggle('open');
+}
+
+function setLang(langCode, label) {
+  document.getElementById('currentLang').textContent = label;
+  document.getElementById('translatorDropdown').classList.remove('open');
+  document.querySelectorAll('.lang-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  if (langCode === 'en') {
+    // Reset to English
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
+    location.reload();
+    return;
+  }
+  
+  // Try Google Translate combo first
+  const tryTranslate = () => {
+    const select = document.querySelector('.goog-te-combo');
+    if (select) {
+      select.value = langCode;
+      select.dispatchEvent(new Event('change'));
+    } else {
+      // Fallback: use Google Translate redirect
+      document.cookie = 'googtrans=/en/' + langCode + '; path=/';
+      document.cookie = 'googtrans=/en/' + langCode + '; path=/; domain=.' + location.hostname;
+      location.reload();
+    }
+  };
+  
+  setTimeout(tryTranslate, 100);
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('translatorWrap');
+  const dd = document.getElementById('translatorDropdown');
+  if (wrap && dd && !wrap.contains(e.target)) dd.classList.remove('open');
+});
+
+// ============================================================
 // INIT
 // ============================================================
 renderTools();
+
+// Apply saved theme on load
+(function(){
+  const t = localStorage.getItem('vidsnap-theme');
+  if (t === 'light') {
+    document.body.classList.add('light-theme');
+    const btn = document.getElementById('themeBtn');
+    if(btn) btn.textContent = '☀️';
+  }
+})();
 </script>
 </body>
 </html>
