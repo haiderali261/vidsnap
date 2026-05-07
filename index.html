@@ -548,6 +548,40 @@ nav {
 .btn-skip.go:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,229,255,0.28); }
 
 /* ======================== TOOLS SECTION ======================== */
+.tools-group {
+  margin-bottom: 40px;
+}
+.tools-group-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border-left: 4px solid var(--accent);
+}
+.tools-group-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+.tools-group-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 0 0 2px 0;
+}
+.tools-group-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+.tools-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
 .tools-section {
   max-width: 1200px;
   margin: 0 auto;
@@ -616,9 +650,7 @@ nav {
 
 /* TOOLS GRID */
 .tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  display: block;
 }
 
 .tool-card {
@@ -1129,6 +1161,42 @@ let currentCat = 'all';
 let currentSearch = '';
 let activeToolId = null;
 
+function makeToolCard(t) {
+  return `
+    <div class="tool-card ${activeToolId === t.id ? 'active-tool' : ''}"
+      style="--card-color:${t.color};"
+      onclick="selectTool('${t.id}')"
+      id="card-${t.id}"
+    >
+      <div class="tool-top">
+        <div class="tool-icon" style="background:${t.bg};">${t.svgIcon || t.icon}</div>
+        <span class="tool-arrow">↗</span>
+      </div>
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-desc">${t.desc}</div>
+      <span class="tool-badge ${BADGE_CLASS[t.badge]}">${BADGE_LABELS[t.badge]}</span>
+    </div>
+  `;
+}
+
+function makeSectionHTML(title, emoji, tools, color) {
+  if (!tools.length) return '';
+  return `
+    <div class="tools-group">
+      <div class="tools-group-header" style="border-left: 4px solid ${color};">
+        <span class="tools-group-emoji">${emoji}</span>
+        <div>
+          <h3 class="tools-group-title">${title}</h3>
+          <p class="tools-group-sub">${tools.length} tools available</p>
+        </div>
+      </div>
+      <div class="tools-grid-inner">
+        ${tools.map(t => makeToolCard(t)).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderTools() {
   const grid = document.getElementById('toolsGrid');
   const q = currentSearch.toLowerCase();
@@ -1144,21 +1212,21 @@ function renderTools() {
     return;
   }
 
-  grid.innerHTML = filtered.map(t => `
-    <div class="tool-card ${activeToolId === t.id ? 'active-tool' : ''}"
-      style="--card-color:${t.color};"
-      onclick="selectTool('${t.id}')"
-      id="card-${t.id}"
-    >
-      <div class="tool-top">
-        <div class="tool-icon" style="background:${t.bg};">${t.svgIcon || t.icon}</div>
-        <span class="tool-arrow">↗</span>
-      </div>
-      <div class="tool-name">${t.name}</div>
-      <div class="tool-desc">${t.desc}</div>
-      <span class="tool-badge ${BADGE_CLASS[t.badge]}">${BADGE_LABELS[t.badge]}</span>
-    </div>
-  `).join('');
+  // If searching or filtering by specific cat, show flat grid
+  if (q || currentCat !== 'all') {
+    grid.innerHTML = `<div class="tools-grid-inner">${filtered.map(t => makeToolCard(t)).join('')}</div>`;
+    return;
+  }
+
+  // Show 3 sections: Video, Image, Music
+  const videoTools = filtered.filter(t => ['social','video','asian'].includes(t.cat));
+  const imageTools = filtered.filter(t => t.cat === 'image');
+  const musicTools = filtered.filter(t => t.cat === 'music');
+
+  grid.innerHTML = 
+    makeSectionHTML('Video & Social Downloaders', '🎬', videoTools, '#00f2ea') +
+    makeSectionHTML('Image Downloaders', '🖼️', imageTools, '#ff6b9d') +
+    makeSectionHTML('Music Downloaders', '🎵', musicTools, '#1db954');
 }
 
 function filterTools(cat, btn) {
