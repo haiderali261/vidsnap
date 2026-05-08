@@ -1417,12 +1417,37 @@ function getChipHTML(tool) {
 // PLATFORM DETECTION
 // ============================================================
 const urlInput = document.getElementById('urlInput');
+
+function normalizeHost(rawUrl) {
+  try {
+    const u = new URL(rawUrl.trim());
+    return u.hostname.toLowerCase().replace(/^www\./, '');
+  } catch (_) {
+    return '';
+  }
+}
+
+function hostMatches(host, pattern) {
+  const p = String(pattern).toLowerCase().replace(/^www\./, '');
+  if (!host || !p) return false;
+
+  // Short-link domains need exact/subdomain matching only.
+  // This prevents pinterest.com / snapchat.com from being detected as X because of the old "t.co" substring rule.
+  return host === p || host.endsWith('.' + p);
+}
+
+function detectTool(rawUrl) {
+  const host = normalizeHost(rawUrl);
+  if (!host) return null;
+  return TOOLS.find(tool => tool.patterns?.some(p => hostMatches(host, p))) || null;
+}
+
 urlInput.addEventListener('input', () => {
   const v = urlInput.value.trim();
   hideErr();
   const chip = document.getElementById('platChip');
   if (!v) { chip.innerHTML = '🌐 Auto Detect'; chip.className = 'platform-chip'; return; }
-  const t = TOOLS.find(tool => tool.patterns?.some(p => v.includes(p)));
+  const t = detectTool(v);
   if (t) {
     chip.innerHTML = getChipHTML(t);
     chip.className = 'platform-chip detected';
@@ -1527,6 +1552,7 @@ async function fetchVideo() {
 
 async function realFetch(url) {
   const host = 'download-all-in-one-ultimate.p.rapidapi.com';
+  const platform = detectTool(url);
   const res = await fetch(`https://${host}/autolink?url=${encodeURIComponent(url)}`, {
     method: 'GET',
     headers: {
@@ -1537,65 +1563,110 @@ async function realFetch(url) {
   if (!res.ok) throw new Error('API '+res.status);
   const data = await res.json();
 
-  const title = data.title || 'Video';
-  const thumb = data.thumbnail || '';
+  const title = data.title || data.name || data.caption || `${platform?.name?.replace(' Downloader','') || 'Video'} Download`;
+  const thumb = data.thumbnail || data.thumb || data.image || data.cover || data.picture || data?.video?.thumbnail || '';
   const duration = data.duration ? String(data.duration) : '';
 
   let formats = [];
   if (data.medias?.length) {
     formats = data.medias
-      .filter(m => m.url && m.type !== 'multiple')
+      .filter(m => {
+        const mediaUrl = m.url || m.downloadUrl || m.link;
+        const type = String(m.type || '').toLowerCase();
+        const ext = String(m.extension || m.ext || '').toLowerCase();
+        if (!mediaUrl || type === 'multiple') return false;
+        // Browser/static sites cannot download adaptive streaming manifests reliably.
+        // Hide them so Dailymotion/Twitch do not open broken HLS pages.
+        if (ext === 'm3u8' || ext === 'mpd' || /\.m3u8(\?|$)|\.mpd(\?|$)/i.test(mediaUrl)) return false;
+        return true;
+      })
       .map(m => ({
-        url: m.url,
-        ext: m.extension || (m.type === 'audio' ? 'mp3' : 'mp4'),
-        quality_label: m.quality === 'hd_no_watermark' ? 'HD (No Watermark)' :
-                       m.quality === 'no_watermark' ? 'HD' :
-                       m.quality === 'watermark' ? 'SD' :
+        url: m.url || m.downloadUrl || m.link,
+        ext: m.extension || m.ext || (String(m.type).toLowerCase() === 'audio' ? 'mp3' : 'mp4'),
+        type: m.type || '',
+        quality: m.quality || m.label || m.resolution || '',
+        quality_label: m.quality === 'hd_no_watermark' ? 'HD No Watermark' :
+                       m.quality === 'no_watermark' ? 'No Watermark' :
+                       m.quality === 'watermark' ? 'Watermark' :
                        m.quality === 'audio' ? 'Audio MP3' :
-                       m.quality || 'HD'
+                       m.quality || m.label || m.resolution || 'HD'
       }));
-  } else if (data.url) {
-    formats = [{ url: data.url, ext: 'mp4', quality_label: 'HD' }];
+  } else if (data.url || data.downloadUrl || data.link) {
+    formats = [{ url: data.url || data.downloadUrl || data.link, ext: 'mp4', quality_label: 'HD' }];
   }
 
-  showResult({ title, thumb, duration });
+  // Prefer clean/no-watermark files when the API provides both versions.
+  const hasNoWatermark = formats.some(f => /no[_\s-]?watermark/i.test(f.quality_label || f.quality || ''));
+  if (hasNoWatermark) {
+    formats = formats.filter(f => !/^watermark$/i.test(String(f.quality_label || f.quality || '').trim()));
+  }
+  formats.sort((a,b) => {
+    const aw = /no[_\s-]?watermark/i.test(a.quality_label || a.quality || '') ? 0 : 1;
+    const bw = /no[_\s-]?watermark/i.test(b.quality_label || b.quality || '') ? 0 : 1;
+    return aw - bw;
+  });
+
+  showResult({ title, thumb, duration, platform });
   if (formats.length) renderApiFormats(formats);
-  else renderQ(VQ);
+  else {
+    renderQ(VQ);
+    showErr('Preview loaded, but no direct downloadable file was returned by the API for this link. Try another quality/link or use a backend downloader for HLS/private videos.');
+  }
   document.getElementById('resultCard').classList.add('on');
 }
 
 function cleanLabel(raw) {
   if (!raw) return 'HD';
-  if (raw === 'download') return 'Best';
-  const m = raw.match(/(\d{3,4})p/);
+  const value = String(raw).replace(/[_-]+/g, ' ').trim();
+  if (/no\s*watermark/i.test(value)) return value.replace(/hd/i, 'HD').replace(/\bno\s*watermark\b/i, 'No Watermark');
+  if (/^watermark$/i.test(value)) return 'Watermark';
+  if (/audio|mp3/i.test(value)) return 'Audio MP3';
+  if (value.toLowerCase() === 'download') return 'Best';
+  const m = value.match(/(2160|1440|1080|720|480|360|240|144)\s*p/i);
   if (m) return m[1]+'p';
-  if (raw.includes('4K') || raw.includes('2160')) return '4K';
-  if (raw.includes('1080')) return '1080p';
-  if (raw.includes('720')) return '720p';
-  if (raw.includes('480')) return '480p';
-  if (raw.includes('360')) return '360p';
-  return raw.length > 10 ? 'HD' : raw;
+  if (value.includes('4K') || value.includes('2160')) return '4K';
+  if (value.includes('1080')) return '1080p';
+  if (value.includes('720')) return '720p';
+  if (value.includes('480')) return '480p';
+  if (value.includes('360')) return '360p';
+  return value.length > 22 ? 'HD' : value;
+}
+
+function safeAttr(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function renderApiFormats(fmts) {
   const grid = document.getElementById('qGrid');
   selQuality = null;
+  const dlBtn = document.getElementById('dlBtn');
+  dlBtn.disabled = true;
+  dlBtn.textContent = '⬇ Select Quality to Download';
+
   const seen = new Set();
   const unique = fmts.filter(f => {
     const lbl = cleanLabel(f.quality_label);
-    if (seen.has(lbl)) return false;
-    seen.add(lbl); return true;
+    const key = `${lbl}|${f.ext}|${f.url}`;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
   });
+
   grid.innerHTML = unique.map((f,i) => {
     const lbl = cleanLabel(f.quality_label);
-    const badge = lbl.includes('4K') || lbl.includes('2160') ? '4k' : lbl.match(/1080|720/) ? 'hd' : 'sd';
-    const safeUrl = encodeURIComponent(f.url||'');
-    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${safeUrl}','${f.ext||'mp4'}','${lbl}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
-      <div class="q-res">${lbl}</div>
-      <div class="q-detail">${(f.ext||'mp4').toUpperCase()}</div>
+    const ext = f.ext || 'mp4';
+    const badge = /4K|2160/.test(lbl) ? '4k' : /1080|720|No Watermark/i.test(lbl) ? 'hd' : /audio|mp3/i.test(lbl) ? 'au' : 'sd';
+    const encoded = encodeURIComponent(f.url || '');
+    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${encoded}','${safeAttr(ext)}','${safeAttr(lbl)}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
+      <div class="q-res">${safeAttr(lbl)}</div>
+      <div class="q-detail">${safeAttr(ext).toUpperCase()}</div>
       <div><span class="q-badge ${BADGE_Q[badge]||'bsd'}">${BADGE_QL[badge]||'SD'}</span></div>
     </div>`;
   }).join('');
+
   unique.forEach((_,i) => setTimeout(() => {
     const el = document.getElementById('qb-'+i);
     if(el){el.style.opacity='1';el.style.transform='translateY(0)';}
@@ -1613,7 +1684,7 @@ function pickQApi(i, safeUrl, ext, label) {
 
 async function demoFetch(url) {
   await new Promise(r => setTimeout(r, 1600));
-  const tool = TOOLS.find(t => t.patterns?.some(p => url.includes(p)));
+  const tool = detectTool(url);
   const titles = {
     youtube:'Amazing YouTube Video — Watch Till The End!',
     tiktok:'Viral TikTok Clip 🔥 — You Won\'t Believe This',
@@ -1634,20 +1705,22 @@ async function demoFetch(url) {
 }
 
 function showResult({ title, thumb, duration, platform, isDemo }) {
-  document.getElementById('vTitle').textContent = title;
+  document.getElementById('vTitle').textContent = title || 'Video';
   const tw = document.getElementById('thumbWrap');
+  const fallbackIcon = platform ? (platform.svgIcon || platform.icon) : '🎬';
   if (thumb) {
-    tw.innerHTML = `<img src="${thumb}" alt="thumb" onerror="this.parentElement.innerHTML='🎬'"/>`;
+    tw.innerHTML = `<img src="${safeAttr(thumb)}" alt="thumb" onerror="this.parentElement.innerHTML='${String(fallbackIcon).replace(/'/g, '&apos;')}'"/>`;
   } else {
-    tw.innerHTML = platform?.icon || '🎬';
+    tw.innerHTML = fallbackIcon;
   }
   const chips = document.getElementById('vChips');
   chips.innerHTML = '';
-  if (duration) chips.innerHTML += `<span class="chip chip-cyan">⏱ ${duration}</span>`;
+  if (duration) chips.innerHTML += `<span class="chip chip-cyan">⏱ ${safeAttr(duration)}</span>`;
   if (platform) chips.innerHTML += `<span class="chip chip-green" style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-flex;width:13px;height:13px;overflow:hidden">${platform.svgIcon||platform.icon}</span>${platform.name.replace(' Downloader','')}</span>`;
   if (isDemo) chips.innerHTML += `<span class="chip chip-demo">⚙ Demo — Add RapidAPI Key</span>`;
   document.getElementById('resultCard').classList.add('on');
 }
+
 
 // ============================================================
 // AD + DOWNLOAD
@@ -1656,12 +1729,8 @@ let adTick = null;
 
 function startDl() {
   if (!selQuality) return;
-  const overlay = document.getElementById('adOverlay');
-  if (overlay) {
-    showAd();
-  } else {
-    doDownload();
-  }
+  // Direct download: removed forced ad overlay because it was breaking downloads on YouTube/Rumble/Bitchute.
+  doDownload();
 }
 
 function showAd() {
@@ -1712,23 +1781,56 @@ function skipAd() {
   doDownload();
 }
 
+function makeFileName(label, ext) {
+  const clean = String(label || 'HD').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '') || 'HD';
+  return `video_${clean}.${ext || 'mp4'}`;
+}
+
+async function forceDownloadFile(url, filename) {
+  // First try blob download. This works when the media server allows CORS.
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (res.ok) {
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        document.body.removeChild(a);
+      }, 800);
+      return true;
+    }
+  } catch (_) {
+    // Cross-origin servers often block blob fetching. Fall back below.
+  }
+
+  // Fallback: request download directly without opening a new tab.
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener noreferrer';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => document.body.removeChild(a), 800);
+  return false;
+}
+
 function doDownload() {
   const prog = document.getElementById('dlProg');
   prog.classList.add('on');
   const ext = selQuality?.ext || 'mp4';
   const label = selQuality?.label || 'HD';
-  document.getElementById('dlName').textContent = `video_${label}.${ext}`;
+  const filename = makeFileName(label, ext);
+  document.getElementById('dlName').textContent = filename;
 
   if (selQuality?.url) {
-    const a = document.createElement('a');
-    a.href = selQuality.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 1000);
-    // Also reset body overflow just in case
+    forceDownloadFile(selQuality.url, filename);
     document.body.style.overflow = '';
   }
 
@@ -1739,7 +1841,7 @@ function doDownload() {
     if (pct >= 100) {
       pct = 100;
       clearInterval(iv);
-      document.getElementById('dlSpd').textContent = '✅ Download Complete!';
+      document.getElementById('dlSpd').textContent = '✅ Download started / completed';
       document.getElementById('dlEta').textContent = '';
     } else {
       document.getElementById('dlSpd').textContent = speeds[~~(Math.random()*speeds.length)];
