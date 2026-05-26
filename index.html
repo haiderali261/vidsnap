@@ -3,7 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VidSnap — Universal Video & Media Downloader</title>
+<title>VidSnap — Free Video Downloader | YouTube, TikTok, Instagram, Facebook</title>
+<meta name="description" content="VidSnap is a free online video downloader. Download videos from YouTube, TikTok, Instagram, Facebook, Twitter, Reddit and 50+ platforms in HD, 4K, MP3. No signup required.">
+<meta name="keywords" content="video downloader, youtube downloader, tiktok downloader, instagram downloader, facebook video downloader, free video downloader, download youtube videos, tiktok video without watermark, instagram reels downloader, online video downloader, HD video downloader, MP3 downloader">
+<meta name="author" content="VidSnap">
+<meta name="robots" content="index, follow">
+<meta name="language" content="English">
+<meta name="revisit-after" content="7 days">
+<link rel="canonical" href="https://www.vidsnap.site/">
+
+<!-- Open Graph (Facebook, WhatsApp preview) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.vidsnap.site/">
+<meta property="og:title" content="VidSnap — Free Video Downloader for YouTube, TikTok, Instagram">
+<meta property="og:description" content="Download videos from 50+ platforms including YouTube, TikTok, Instagram in HD and 4K quality. Free, fast, no signup needed.">
+<meta property="og:image" content="https://www.vidsnap.site/og-image.png">
+<meta property="og:site_name" content="VidSnap">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://www.vidsnap.site/">
+<meta name="twitter:title" content="VidSnap — Free Video Downloader">
+<meta name="twitter:description" content="Download videos from YouTube, TikTok, Instagram and 50+ platforms for free in HD quality.">
+<meta name="twitter:image" content="https://www.vidsnap.site/og-image.png">
+
+<!-- Schema.org Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "VidSnap",
+  "url": "https://www.vidsnap.site/",
+  "description": "Free online video downloader for YouTube, TikTok, Instagram, Facebook and 50+ platforms",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "YouTube Video Downloader",
+    "TikTok Video Downloader",
+    "Instagram Reels Downloader",
+    "Facebook Video Downloader",
+    "4K Video Download",
+    "MP3 Audio Extraction",
+    "No Registration Required"
+  ]
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1656,8 +1705,6 @@ let adTick = null;
 
 function startDl() {
   if (!selQuality) return;
-  document.body.style.overflow = '';
-  document.documentElement.style.overflow = '';
   const overlay = document.getElementById('adOverlay');
   if (overlay) {
     showAd();
@@ -1715,10 +1762,6 @@ function skipAd() {
 }
 
 function doDownload() {
-  // Always reset overflow first
-  document.body.style.overflow = '';
-  document.documentElement.style.overflow = '';
-
   const prog = document.getElementById('dlProg');
   prog.classList.add('on');
   const ext = selQuality?.ext || 'mp4';
@@ -1726,23 +1769,18 @@ function doDownload() {
   document.getElementById('dlName').textContent = `video_${label}.${ext}`;
 
   if (selQuality?.url) {
-    const dlUrl = selQuality.url;
-    const fname = `vidsnap_${label}.${ext}`;
-
-    // Directly open in new tab — most reliable for all platforms
-    // (YouTube, Dailymotion, Twitch block CORS so blob fails)
     const a = document.createElement('a');
-    a.href = dlUrl;
-    a.download = fname;
+    a.href = selQuality.url;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => document.body.removeChild(a), 500);
+    setTimeout(() => document.body.removeChild(a), 1000);
+    // Also reset body overflow just in case
+    document.body.style.overflow = '';
   }
 
-  // Animate progress bar
   let pct = 0;
   const speeds = ['2.4 MB/s','3.8 MB/s','4.5 MB/s','3.1 MB/s','5.2 MB/s'];
   const iv = setInterval(() => {
@@ -1750,7 +1788,7 @@ function doDownload() {
     if (pct >= 100) {
       pct = 100;
       clearInterval(iv);
-      document.getElementById('dlSpd').textContent = '✅ Done! Check your downloads or new tab.';
+      document.getElementById('dlSpd').textContent = '✅ Download Complete!';
       document.getElementById('dlEta').textContent = '';
     } else {
       document.getElementById('dlSpd').textContent = speeds[~~(Math.random()*speeds.length)];
