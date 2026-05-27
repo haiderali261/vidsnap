@@ -1169,9 +1169,9 @@ footer {
   .platform-chip { display: none; }
   .video-row { flex-direction: column; }
   .video-thumb-wrap { width: 100%; height: 100px; }
-  .stats-bar { flex-direction: column; }
-  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
-  .stat-item:last-child { border-bottom: none; }
+  .stats-bar { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
+  .stat-item { border-right: 1px solid var(--border); border-bottom: none; min-width: 70px; flex: 1; }
+  .stat-item:last-child { border-right: none; }
   nav .nav-count { display: none; }
   .q-grid { grid-template-columns: repeat(3, 1fr); }
   .tools-grid { grid-template-columns: repeat(2, 1fr); }
