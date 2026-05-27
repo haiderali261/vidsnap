@@ -1040,41 +1040,43 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   animation: fadeDown 0.5s 0.32s ease both;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
 }
 .stats-bar::-webkit-scrollbar { display: none; }
 .stat-item {
   flex: 1;
-  min-width: 80px;
-  padding: 14px 16px;
+  min-width: 0;
+  padding: 14px 8px;
   text-align: center;
   border-right: 1px solid var(--border);
-  white-space: nowrap;
+  overflow: hidden;
 }
 .stat-item:last-child { border-right: none; }
 .stat-num {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 1.4rem;
+  font-size: clamp(0.85rem, 2.5vw, 1.4rem);
   color: var(--accent);
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
-.stat-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-@media (max-width: 600px) {
+.stat-lbl {
+  font-size: clamp(0.55rem, 1.5vw, 0.72rem);
+  color: var(--muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 480px) {
   .stats-bar {
-    margin: 0 12px 36px;
+    margin: 0 10px 32px;
     border-radius: 12px;
   }
-  .stat-item {
-    min-width: 72px;
-    padding: 12px 10px;
-  }
-  .stat-num { font-size: 1.15rem; }
-  .stat-lbl { font-size: 0.65rem; }
+  .stat-item { padding: 10px 4px; }
 }
 
 /* HOW TO */
@@ -1169,8 +1171,8 @@ footer {
   .platform-chip { display: none; }
   .video-row { flex-direction: column; }
   .video-thumb-wrap { width: 100%; height: 100px; }
-  .stats-bar { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
-  .stat-item { border-right: 1px solid var(--border); border-bottom: none; min-width: 70px; flex: 1; }
+  .stats-bar { flex-direction: row; flex-wrap: nowrap; }
+  .stat-item { border-right: 1px solid var(--border); border-bottom: none; min-width: 0; flex: 1; }
   .stat-item:last-child { border-right: none; }
   nav .nav-count { display: none; }
   .q-grid { grid-template-columns: repeat(3, 1fr); }
