@@ -1035,20 +1035,25 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
   margin: 0 auto 48px;
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   animation: fadeDown 0.5s 0.32s ease both;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.stats-bar::-webkit-scrollbar { display: none; }
 .stat-item {
   flex: 1;
-  min-width: 100px;
-  padding: 16px 20px;
+  min-width: 80px;
+  padding: 14px 16px;
   text-align: center;
   border-right: 1px solid var(--border);
+  white-space: nowrap;
 }
 .stat-item:last-child { border-right: none; }
 .stat-num {
@@ -1059,6 +1064,18 @@ body.light-theme .search-wrap input { background: #fff; border-color: #d1d5db; c
   letter-spacing: -0.02em;
 }
 .stat-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+@media (max-width: 600px) {
+  .stats-bar {
+    margin: 0 12px 36px;
+    border-radius: 12px;
+  }
+  .stat-item {
+    min-width: 72px;
+    padding: 12px 10px;
+  }
+  .stat-num { font-size: 1.15rem; }
+  .stat-lbl { font-size: 0.65rem; }
+}
 
 /* HOW TO */
 .howto {
