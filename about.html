@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — VidSnap</title>
+<meta name="description" content="Learn about VidSnap — the free online video downloader supporting YouTube, TikTok, Instagram, Facebook and 50+ platforms.">
+<link rel="canonical" href="https://www.vidsnap.site/about.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07080f;
+  --surface: #0f1018;
+  --surface2: #171820;
+  --surface3: #1e2030;
+  --border: #252638;
+  --border2: #2e3050;
+  --accent: #00e5ff;
+  --accent2: #7c3aed;
+  --text: #eeeef8;
+  --muted: #7878a0;
+  --muted2: #555570;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* NAVBAR */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,8,15,0.95);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo span { color: var(--accent); }
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.back-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(0,229,255,0.06);
+}
+
+/* PAGE CONTENT */
+.page-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+.page-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.page-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(0,229,255,0.08);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 6px;
+  padding: 4px 12px;
+  margin-bottom: 16px;
+}
+.page-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+.page-header p {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* CONTENT SECTIONS */
+.content-section {
+  margin-bottom: 36px;
+}
+.content-section h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.content-section h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.content-section p {
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+.content-section ul {
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.content-section ul li { margin-bottom: 6px; }
+.content-section a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.content-section a:hover { text-decoration: underline; }
+
+/* STATS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin: 28px 0;
+}
+.stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.stat-card .num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.stat-card .lbl {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 24px;
+  text-align: center;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 20px;
+  margin-bottom: 12px;
+}
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--accent); }
+.footer-note {
+  font-size: 0.75rem;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="https://www.vidsnap.site/" class="nav-logo">Vid<span>Snap</span></a>
+  <a href="javascript:history.back()" class="back-btn">← Back</a>
+</nav>
+
+<!-- PAGE CONTENT -->
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="page-badge">About</div>
+    <h1>About VidSnap</h1>
+    <p>Your free, fast, and reliable video downloader for 50+ platforms — no signup required.</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num">50+</div><div class="lbl">Platforms</div></div>
+    <div class="stat-card"><div class="num">4K</div><div class="lbl">HD Quality</div></div>
+    <div class="stat-card"><div class="num">Free</div><div class="lbl">Always Free</div></div>
+    <div class="stat-card"><div class="num">Fast</div><div class="lbl">Instant Links</div></div>
+  </div>
+
+  <div class="content-section">
+    <h2>What is VidSnap?</h2>
+    <p>VidSnap is a free online video downloader that supports 50+ platforms including YouTube, TikTok, Instagram, Facebook, Twitter, Reddit, and many more. We help you save videos for personal offline use quickly and easily — no signup required.</p>
+    <p>Whether you want to save a funny TikTok, an Instagram Reel, a YouTube video, or a Twitter clip, VidSnap makes it as simple as pasting a link and clicking download.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>Our Mission</h2>
+    <p>To provide the fastest, simplest, and most reliable free video downloading tool on the internet. We believe downloading content you love for personal use should be free and effortless.</p>
+    <p>We are constantly improving VidSnap to support more platforms, better quality options, and a smoother experience for users worldwide.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>Supported Platforms</h2>
+    <ul>
+      <li>YouTube — TikTok — Instagram</li>
+      <li>Facebook — Twitter/X — Reddit</li>
+      <li>Vimeo — Dailymotion — Twitch</li>
+      <li>SoundCloud — Bandcamp (MP3)</li>
+      <li>Pinterest — Flickr — Shutterstock</li>
+      <li>Rumble — VK — Bilibili — and 35+ more</li>
+    </ul>
+  </div>
+
+  <div class="content-section">
+    <h2>Contact Us</h2>
+    <p>Have a question, suggestion, or feedback? We'd love to hear from you.</p>
+    <p>Email: <a href="mailto:contact@vidsnap.site">contact@vidsnap.site</a></p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="https://www.vidsnap.site/">Home</a>
+    <a href="/about.html">About Us</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="/dmca.html">DMCA Notice</a>
+    <a href="mailto:contact@vidsnap.site">Contact</a>
+  </div>
+  <div class="footer-note">
+    © 2025 VidSnap — For personal use only. We do not host any videos.<br>
+    Please respect copyright laws and platform terms of service.
+  </div>
+</footer>
+
+</body>
+</html>
