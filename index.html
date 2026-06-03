@@ -1913,9 +1913,10 @@ function switchFmt(fmt, btn) {
 }
 
 // ============================================================
-// FETCH VIDEO
+// FETCH VIDEO — Social Download All In One (RapidAPI)
 // ============================================================
-const RAPIDAPI_KEY = '264e0c752cmsha01e25047a292c2p188c69jsnc37e126ec2ec'; // 👈 Apni key yahan lagao
+const RAPIDAPI_KEY = '264e0c752cmsha01e25047a292c2p188c69jsnc37e126ec2ec';
+const RAPIDAPI_HOST = 'social-download-all-in-one.p.rapidapi.com';
 
 async function fetchVideo() {
   const url = urlInput.value.trim();
@@ -1927,11 +1928,7 @@ async function fetchVideo() {
   hideResult();
 
   try {
-    if (RAPIDAPI_KEY !== 'YOUR_RAPIDAPI_KEY_HERE') {
-      await realFetch(url);
-    } else {
-      await demoFetch(url);
-    }
+    await realFetch(url);
   } catch(e) {
     showErr('Could not fetch video. Please check the URL and try again.');
     console.error(e);
@@ -1941,44 +1938,63 @@ async function fetchVideo() {
 }
 
 async function realFetch(url) {
-  const host = 'download-all-in-one-ultimate.p.rapidapi.com';
-  const res = await fetch(`https://${host}/autolink?url=${encodeURIComponent(url)}`, {
-    method: 'GET',
+  const res = await fetch('https://social-download-all-in-one.p.rapidapi.com/v1/social/autolink', {
+    method: 'POST',
     headers: {
+      'Content-Type': 'application/json',
       'x-rapidapi-key': RAPIDAPI_KEY,
-      'x-rapidapi-host': host
-    }
+      'x-rapidapi-host': RAPIDAPI_HOST
+    },
+    body: JSON.stringify({ url })
   });
-  if (!res.ok) throw new Error('API '+res.status);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'API ' + res.status);
+  }
+
   const data = await res.json();
 
-  const title = data.title || 'Video';
-  const thumb = data.thumbnail || '';
-  const duration = data.duration ? String(data.duration) : '';
+  const title    = data.title    || data.name || 'Video';
+  const thumb    = data.thumbnail || data.cover || data.pic || '';
+  const duration = data.duration  ? String(data.duration) : '';
 
+  // Parse medias from different response formats
   let formats = [];
+
+  // Format 1: data.medias[]
   if (data.medias?.length) {
     formats = data.medias
-      .filter(m => m.url && m.type !== 'multiple')
+      .filter(m => m.url)
       .map(m => ({
-        url: m.url,
-        ext: m.extension || (m.type === 'audio' ? 'mp3' : 'mp4'),
-        quality_label: m.quality === 'hd_no_watermark' ? 'HD (No Watermark)' :
-                       m.quality === 'no_watermark' ? 'HD' :
-                       m.quality === 'watermark' ? 'SD (Watermark)' :
-                       m.quality === 'audio' ? 'Audio MP3' :
-                       m.quality || 'HD'
+        url:           m.url,
+        ext:           m.extension || m.ext || 'mp4',
+        quality_label: m.quality   || m.quality_label || 'HD'
       }));
-  } else if (data.url) {
-    formats = [{ url: data.url, ext: data.ext || 'mp4', quality_label: 'Best Quality' }];
-  } else if (data.links?.length) {
-    formats = data.links.filter(l => l.url).map(l => ({
-      url: l.url, ext: l.ext || 'mp4', quality_label: l.quality || l.label || 'HD'
-    }));
-  } else if (data.videos?.length) {
-    formats = data.videos.filter(v => v.url).map(v => ({
-      url: v.url, ext: v.ext || 'mp4', quality_label: v.quality || v.resolution || 'HD'
-    }));
+  }
+  // Format 2: data.links[]
+  else if (data.links?.length) {
+    formats = data.links
+      .filter(m => m.url)
+      .map(m => ({
+        url:           m.url,
+        ext:           m.type || 'mp4',
+        quality_label: m.quality || m.resolution || 'HD'
+      }));
+  }
+  // Format 3: data.url (single)
+  else if (data.url) {
+    formats = [{ url: data.url, ext: 'mp4', quality_label: 'HD' }];
+  }
+  // Format 4: data.videos[]
+  else if (data.videos?.length) {
+    formats = data.videos
+      .filter(m => m.url)
+      .map(m => ({
+        url:           m.url,
+        ext:           m.ext || 'mp4',
+        quality_label: m.quality || m.size || 'HD'
+      }));
   }
 
   showResult({ title, thumb, duration });
