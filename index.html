@@ -2076,7 +2076,7 @@ function showResult({ title, thumb, duration, platform, isDemo }) {
   document.getElementById('vTitle').textContent = title;
   const tw = document.getElementById('thumbWrap');
   if (thumb) {
-    tw.innerHTML = `<img src="${thumb}" alt="thumb" onerror="this.parentElement.innerHTML='🎬'"/>`;
+    tw.innerHTML = `<img src="${thumb}" alt="thumb" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='🎬'"/>`;
   } else {
     tw.innerHTML = platform?.icon || '🎬';
   }
@@ -2159,15 +2159,30 @@ function doDownload() {
   document.getElementById('dlName').textContent = `video_${label}.${ext}`;
 
   if (selQuality?.url) {
-    const a = document.createElement('a');
-    a.href = selQuality.url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 1000);
-    // Also reset body overflow just in case
+    const _ext = selQuality.ext || 'mp4';
+    const _label = selQuality.label || 'HD';
+    const _filename = 'video_' + _label + '.' + _ext;
+    fetch(selQuality.url)
+      .then(r => r.blob())
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = _filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 2000);
+      })
+      .catch(() => {
+        const a = document.createElement('a');
+        a.href = selQuality.url;
+        a.download = _filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.body.removeChild(a), 1000);
+      });
     document.body.style.overflow = '';
   }
 
