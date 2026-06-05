@@ -1943,7 +1943,7 @@ async function fetchVideo() {
 }
 
 async function realFetch(url) {
-  const res = await fetch(`http://167.233.61.101:8000/download?url=${encodeURIComponent(url)}`, {
+  const res = await fetch(`https://api.vidsnap.site/download?url=${encodeURIComponent(url)}`, {
     method: 'GET',
   });
 
