@@ -1603,6 +1603,11 @@ function googleTranslateElementInit() {
     </div>
     <div class="footer-links">
       <a href="https://www.vidsnap.site/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/tiktok-downloader/">TikTok</a>
+      <a href="/youtube-downloader/">YouTube</a>
+      <a href="/instagram-downloader/">Instagram</a>
+      <a href="/facebook-downloader/">Facebook</a>
       <a href="/about.html">About Us</a>
       <a href="/privacy.html">Privacy Policy</a>
       <a href="/terms.html">Terms of Service</a>
@@ -1938,14 +1943,8 @@ async function fetchVideo() {
 }
 
 async function realFetch(url) {
-  const res = await fetch('https://social-download-all-in-one.p.rapidapi.com/v1/social/autolink', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-rapidapi-key': RAPIDAPI_KEY,
-      'x-rapidapi-host': RAPIDAPI_HOST
-    },
-    body: JSON.stringify({ url })
+  const res = await fetch(`http://167.233.61.101:8000/download?url=${encodeURIComponent(url)}`, {
+    method: 'GET',
   });
 
   if (!res.ok) {
@@ -1959,42 +1958,18 @@ async function realFetch(url) {
   const thumb    = data.thumbnail || data.cover || data.pic || '';
   const duration = data.duration  ? String(data.duration) : '';
 
-  // Parse medias from different response formats
+  // Parse medias — yt-dlp format: data.medias[]
   let formats = [];
-
-  // Format 1: data.medias[]
   if (data.medias?.length) {
     formats = data.medias
       .filter(m => m.url)
       .map(m => ({
         url:           m.url,
         ext:           m.extension || m.ext || 'mp4',
-        quality_label: m.quality   || m.quality_label || 'HD'
+        quality_label: m.quality   || 'HD'
       }));
-  }
-  // Format 2: data.links[]
-  else if (data.links?.length) {
-    formats = data.links
-      .filter(m => m.url)
-      .map(m => ({
-        url:           m.url,
-        ext:           m.type || 'mp4',
-        quality_label: m.quality || m.resolution || 'HD'
-      }));
-  }
-  // Format 3: data.url (single)
-  else if (data.url) {
-    formats = [{ url: data.url, ext: 'mp4', quality_label: 'HD' }];
-  }
-  // Format 4: data.videos[]
-  else if (data.videos?.length) {
-    formats = data.videos
-      .filter(m => m.url)
-      .map(m => ({
-        url:           m.url,
-        ext:           m.ext || 'mp4',
-        quality_label: m.quality || m.size || 'HD'
-      }));
+  } else if (data.url) {
+    formats = [{ url: data.url, ext: data.ext || 'mp4', quality_label: 'HD' }];
   }
 
   showResult({ title, thumb, duration });
