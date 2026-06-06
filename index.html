@@ -1955,6 +1955,7 @@ async function realFetch(url) {
   const data = await res.json();
 
   const title    = data.title    || data.name || 'Video';
+  window.currentTitle = title;
   const thumb    = data.thumbnail || data.cover || data.pic || '';
   const duration = data.duration  ? String(data.duration) : '';
 
@@ -2136,7 +2137,9 @@ function doDownload() {
   if (selQuality?.url) {
     const _ext = selQuality.ext || 'mp4';
     const _label = selQuality.label || 'HD';
-    const _filename = 'video_' + _label + '.' + _ext;
+    const _title = (selQuality && selQuality.title) ? selQuality.title : (typeof currentTitle !== 'undefined' ? currentTitle : 'video');
+    const _safeTitle = _title.replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 60);
+    const _filename = _safeTitle + '_' + _label + '.' + _ext;
     // Use our proxy server for direct download
     const proxyUrl = 'https://api.vidsnap.site/proxy?url=' + encodeURIComponent(selQuality.url) + '&filename=' + encodeURIComponent(_filename);
     const a = document.createElement('a');
