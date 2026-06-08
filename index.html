@@ -1997,8 +1997,28 @@ function cleanLabel(raw) {
 function renderApiFormats(fmts) {
   const grid = document.getElementById('qGrid');
   selQuality = null;
+
+  // Filter based on active tool category
+  const activeTool = TOOLS.find(t => t.id === activeToolId);
+  const toolCat = activeTool ? activeTool.cat : 'video';
+
+  let filtered = fmts;
+  if (toolCat === 'music') {
+    // Music tools: only show audio
+    filtered = fmts.filter(f => f.ext === 'mp3' || (f.quality_label || '').toLowerCase().includes('audio') || f.type === 'audio');
+    if (!filtered.length) filtered = fmts; // fallback
+  } else if (toolCat === 'image') {
+    // Image tools: only show image formats
+    filtered = fmts.filter(f => ['jpg','jpeg','png','gif','webp'].includes((f.ext||'').toLowerCase()) || f.type === 'image');
+    if (!filtered.length) filtered = fmts; // fallback
+  } else {
+    // Video tools: hide audio-only formats
+    filtered = fmts.filter(f => f.ext !== 'mp3' && !(f.quality_label || '').toLowerCase().includes('audio mp3') && f.type !== 'audio');
+    if (!filtered.length) filtered = fmts; // fallback
+  }
+
   const seen = new Set();
-  const unique = fmts.filter(f => {
+  const unique = filtered.filter(f => {
     const lbl = cleanLabel(f.quality_label);
     if (seen.has(lbl)) return false;
     seen.add(lbl); return true;
