@@ -1926,6 +1926,7 @@ const RAPIDAPI_HOST = 'social-download-all-in-one.p.rapidapi.com';
 async function fetchVideo() {
   const url = urlInput.value.trim();
   window.currentVideoUrl = url;
+  window._lastFetchedUrl = url;
   if (!url) { showErr('Please paste a video URL first!'); return; }
   if (!url.startsWith('http')) { showErr('Please enter a valid URL starting with https://'); return; }
 
@@ -1969,7 +1970,7 @@ async function realFetch(url) {
         url:           m.url,
         audio_url:     m.audio_url || null,
         needs_merge:   !!(m.audio_url),
-        orig_url:      window.currentVideoUrl || '',
+        orig_url:      window._lastFetchedUrl || window.currentVideoUrl || urlInput.value.trim() || '',
         ext:           m.extension || m.ext || 'mp4',
         quality_label: m.quality   || 'HD'
       }));
@@ -2031,7 +2032,8 @@ function renderApiFormats(fmts) {
     const safeUrl = encodeURIComponent(f.url||'');
     const safeAudioUrl = f.audio_url ? encodeURIComponent(f.audio_url) : '';
     const needsMerge = f.needs_merge ? 'true' : 'false';
-    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${safeUrl}','${f.ext||'mp4'}','${lbl}','${safeAudioUrl}','${needsMerge}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
+    const safeOrigUrl = encodeURIComponent(f.orig_url||'');
+    return `<div class="q-btn" id="qb-${i}" onclick="pickQApi(${i},'${safeUrl}','${f.ext||'mp4'}','${lbl}','${safeAudioUrl}','${needsMerge}','${safeOrigUrl}')" style="opacity:0;transform:translateY(8px);transition:all 0.25s ${i*0.06}s ease">
       <div class="q-res">${lbl}</div>
       <div class="q-detail">${(f.ext||'mp4').toUpperCase()}</div>
       <div><span class="q-badge ${BADGE_Q[badge]||'bsd'}">${BADGE_QL[badge]||'SD'}</span></div>
@@ -2043,13 +2045,14 @@ function renderApiFormats(fmts) {
   }, 20+i*60));
 }
 
-function pickQApi(i, safeUrl, ext, label, safeAudioUrl, needsMerge) {
+function pickQApi(i, safeUrl, ext, label, safeAudioUrl, needsMerge, safeOrigUrl) {
   document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
   document.getElementById('qb-'+i)?.classList.add('sel');
   selQuality = {
     label, ext,
     url: decodeURIComponent(safeUrl),
     audio_url: safeAudioUrl ? decodeURIComponent(safeAudioUrl) : null,
+    orig_url: safeOrigUrl ? decodeURIComponent(safeOrigUrl) : (window._lastFetchedUrl || ''),
     needs_merge: needsMerge === 'true' || needsMerge === true
   };
   const dlBtn = document.getElementById('dlBtn');
