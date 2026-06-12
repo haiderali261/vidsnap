@@ -1925,6 +1925,7 @@ const RAPIDAPI_HOST = 'social-download-all-in-one.p.rapidapi.com';
 
 async function fetchVideo() {
   const url = urlInput.value.trim();
+  window.currentVideoUrl = url;
   if (!url) { showErr('Please paste a video URL first!'); return; }
   if (!url.startsWith('http')) { showErr('Please enter a valid URL starting with https://'); return; }
 
@@ -1968,6 +1969,7 @@ async function realFetch(url) {
         url:           m.url,
         audio_url:     m.audio_url || null,
         needs_merge:   !!(m.audio_url),
+        orig_url:      window.currentVideoUrl || '',
         ext:           m.extension || m.ext || 'mp4',
         quality_label: m.quality   || 'HD'
       }));
@@ -2169,9 +2171,12 @@ function doDownload() {
     const _title = (selQuality && selQuality.title) ? selQuality.title : (typeof currentTitle !== 'undefined' ? currentTitle : 'video');
     const _safeTitle = _title.replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 60);
     const _filename = _safeTitle + '_' + _label + '.' + _ext;
-    // Use merge endpoint if video+audio are separate, otherwise proxy
+    // Use ytdl for TikTok, merge for separate streams, proxy for others
     let downloadUrl;
-    if (selQuality.needs_merge && selQuality.audio_url) {
+    const _origUrl = selQuality.orig_url || '';
+    if (_origUrl.includes('tiktok.com')) {
+      downloadUrl = 'https://api.vidsnap.site/ytdl?url=' + encodeURIComponent(_origUrl);
+    } else if (selQuality.needs_merge && selQuality.audio_url) {
       downloadUrl = 'https://api.vidsnap.site/merge?video_url=' + encodeURIComponent(selQuality.url) + '&audio_url=' + encodeURIComponent(selQuality.audio_url) + '&filename=' + encodeURIComponent(_filename);
     } else {
       downloadUrl = 'https://api.vidsnap.site/proxy?url=' + encodeURIComponent(selQuality.url) + '&filename=' + encodeURIComponent(_filename);
