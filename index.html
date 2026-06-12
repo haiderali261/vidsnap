@@ -1967,7 +1967,7 @@ async function realFetch(url) {
       .map(m => ({
         url:           m.url,
         audio_url:     m.audio_url || null,
-        needs_merge:   m.needs_merge || false,
+        needs_merge:   !!(m.audio_url),
         ext:           m.extension || m.ext || 'mp4',
         quality_label: m.quality   || 'HD'
       }));
