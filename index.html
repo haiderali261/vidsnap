@@ -2177,7 +2177,9 @@ function doDownload() {
     // Use ytdl for TikTok, merge for separate streams, proxy for others
     let downloadUrl;
     const _origUrl = selQuality.orig_url || '';
-    if (_origUrl.includes('tiktok.com') || _origUrl.includes('twitter.com') || _origUrl.includes('x.com') || _origUrl.includes('t.co') || _origUrl.includes('pinterest.com') || _origUrl.includes('pin.it')) {
+    if (selQuality.type === 'image') {
+      downloadUrl = 'https://api.vidsnap.site/proxy?url=' + encodeURIComponent(selQuality.url) + '&filename=' + encodeURIComponent(_filename);
+    } else if (_origUrl.includes('tiktok.com') || _origUrl.includes('twitter.com') || _origUrl.includes('x.com') || _origUrl.includes('t.co') || _origUrl.includes('pinterest.com') || _origUrl.includes('pin.it')) {
       downloadUrl = 'https://api.vidsnap.site/ytdl?url=' + encodeURIComponent(_origUrl);
     } else if (selQuality.needs_merge && selQuality.audio_url) {
       downloadUrl = 'https://api.vidsnap.site/merge?video_url=' + encodeURIComponent(selQuality.url) + '&audio_url=' + encodeURIComponent(selQuality.audio_url) + '&filename=' + encodeURIComponent(_filename);
