@@ -1926,13 +1926,12 @@ const RAPIDAPI_HOST = 'social-download-all-in-one.p.rapidapi.com';
 async function fetchVideo() {
   let url = urlInput.value.trim();
   // Convert YouTube Shorts URL to regular URL
-  if (url.includes('youtube.com/shorts/')) {
-    url = url.replace('youtube.com/shorts/', 'youtube.com/watch?v=').split('?')[0];
-    url = url + (url.includes('?') ? '' : '');
-    // Clean up - keep only watch?v= part
-    const shortsMatch = url.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]+)/);
-    if (shortsMatch) url = 'https://www.youtube.com/watch?v=' + shortsMatch[1];
-    urlInput.value = url;
+  if (url.includes('youtube.com/shorts/') || url.includes('youtu.be/')) {
+    const shortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
+    if (shortsMatch) {
+      url = 'https://www.youtube.com/watch?v=' + shortsMatch[1];
+      urlInput.value = url;
+    }
   }
   window.currentVideoUrl = url;
   window._lastFetchedUrl = url;
