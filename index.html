@@ -1979,7 +1979,8 @@ async function realFetch(url) {
         audio_url:     m.audio_url || null,
         needs_merge:   !!(m.audio_url),
         orig_url:      window._lastFetchedUrl || window.currentVideoUrl || urlInput.value.trim() || '',
-        ext:           m.extension || m.ext || 'mp4',
+        type:          m.type || 'video',
+        ext:           m.type === 'image' ? (m.extension || 'jpg') : (m.extension || m.ext || 'mp4'),
         quality_label: m.quality   || 'HD'
       }));
   } else if (data.url) {
@@ -2094,7 +2095,7 @@ function showResult({ title, thumb, duration, platform, isDemo }) {
   document.getElementById('vTitle').textContent = title;
   const tw = document.getElementById('thumbWrap');
   if (thumb) {
-    tw.innerHTML = `<img src="${thumb}" alt="thumb" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='🎬'"/>`;
+    tw.innerHTML = `<img src="${thumb}" alt="thumb" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='🎬'"/>`;
   } else {
     tw.innerHTML = platform?.icon || '🎬';
   }
