@@ -2,16 +2,16 @@
   "name": "VidSnap - Free Video Downloader",
   "short_name": "VidSnap",
   "description": "Free online video downloader for YouTube, TikTok, Instagram, Facebook and 50+ platforms.",
-  "start_url": "/?source=pwa",
-  "id": "/?source=pwa",
-  "scope": "/",
+  "start_url": "https://www.vidsnap.site/?source=pwa",
+  "id": "https://www.vidsnap.site/?source=pwa",
+  "scope": "https://www.vidsnap.site/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#F5F0FF",
   "theme_color": "#6C63FF",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" }
+    { "src": "https://www.vidsnap.site/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "https://www.vidsnap.site/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "https://www.vidsnap.site/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" }
   ]
 }
