@@ -2450,7 +2450,8 @@ function closePage() {
 (function(){
   // ---- Register Service Worker (static file, proper install support) ----
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(err){
+    var swURL = window.location.origin + '/sw.js';
+    navigator.serviceWorker.register(swURL, { scope: window.location.origin + '/' }).catch(function(err){
       console.warn('SW registration failed:', err);
     });
   }
