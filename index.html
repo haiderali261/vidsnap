@@ -1933,13 +1933,13 @@ const RAPIDAPI_HOST = 'social-download-all-in-one.p.rapidapi.com';
 
 async function fetchVideo() {
   let url = urlInput.value.trim();
-  // Convert YouTube Shorts URL to regular URL
-  if (url.includes('youtube.com/shorts/') || url.includes('youtu.be/')) {
-    const shortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
-    if (shortsMatch) {
-      url = 'https://www.youtube.com/watch?v=' + shortsMatch[1];
-      urlInput.value = url;
-    }
+  // Convert YouTube Shorts / youtu.be short links to full watch URL
+  if (url.includes('youtube.com/shorts/')) {
+    const m = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
+    if (m) { url = 'https://www.youtube.com/watch?v=' + m[1]; urlInput.value = url; }
+  } else if (url.includes('youtu.be/')) {
+    const m = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
+    if (m) { url = 'https://www.youtube.com/watch?v=' + m[1]; urlInput.value = url; }
   }
   window.currentVideoUrl = url;
   window._lastFetchedUrl = url;
@@ -2200,7 +2200,12 @@ function doDownload() {
     } else if (_origUrl.includes('tiktok.com') || _origUrl.includes('twitter.com') || _origUrl.includes('x.com') || _origUrl.includes('t.co') || _origUrl.includes('pinterest.com') || _origUrl.includes('pin.it')) {
       downloadUrl = 'https://api.vidsnap.site/ytdl?url=' + encodeURIComponent(_origUrl);
     } else if (selQuality.needs_merge && selQuality.audio_url) {
-      downloadUrl = 'https://api.vidsnap.site/merge?video_url=' + encodeURIComponent(selQuality.url) + '&audio_url=' + encodeURIComponent(selQuality.audio_url) + '&filename=' + encodeURIComponent(_filename);
+      const isYT = _origUrl.includes('youtube.com') || _origUrl.includes('youtu.be');
+      if (isYT) {
+        downloadUrl = 'https://api.vidsnap.site/ytdl?url=' + encodeURIComponent(_origUrl) + '&quality=' + encodeURIComponent(selQuality.label || 'best');
+      } else {
+        downloadUrl = 'https://api.vidsnap.site/merge?video_url=' + encodeURIComponent(selQuality.url) + '&audio_url=' + encodeURIComponent(selQuality.audio_url) + '&filename=' + encodeURIComponent(_filename);
+      }
     } else {
       downloadUrl = 'https://api.vidsnap.site/proxy?url=' + encodeURIComponent(selQuality.url) + '&filename=' + encodeURIComponent(_filename);
     }
