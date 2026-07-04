@@ -2210,13 +2210,8 @@ function doDownload() {
     } else {
       downloadUrl = 'https://api.vidsnap.site/proxy?url=' + encodeURIComponent(selQuality.url) + '&filename=' + encodeURIComponent(_filename);
     }
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = _filename;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 1000);
+    // Open download URL
+    window.open(downloadUrl, '_blank');
     document.body.style.overflow = '';
   }
 
