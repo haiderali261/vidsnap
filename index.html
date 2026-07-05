@@ -247,6 +247,24 @@ body {
 
 /* LAYOUT */
 .wrap { position: relative; z-index: 1; }
+.ad-sidebar {
+  display: none;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  width: 300px;
+}
+.ad-sidebar-left { left: 10px; }
+.ad-sidebar-right { right: 10px; }
+@media (min-width: 1400px) {
+  .ad-sidebar { display: block; }
+}
+.ad-inline {
+  max-width: 720px;
+  margin: 0 auto 24px;
+  text-align: center;
+}
 
 /* NAV */
 nav {
@@ -1392,6 +1410,32 @@ footer {
 <div class="bg-grid"></div>
 
 <div class="wrap">
+<!-- Ad Left Sidebar -->
+<div class="ad-sidebar ad-sidebar-left">
+<script>
+  atOptions = {
+    'key' : 'e487d4ffd75aac4e9be5be595b3888d7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/e487d4ffd75aac4e9be5be595b3888d7/invoke.js"></script>
+</div>
+<!-- Ad Right Sidebar -->
+<div class="ad-sidebar ad-sidebar-right">
+<script>
+  atOptions = {
+    'key' : 'e487d4ffd75aac4e9be5be595b3888d7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/e487d4ffd75aac4e9be5be595b3888d7/invoke.js"></script>
+</div>
 
 <!-- NAV -->
 <nav>
@@ -1510,6 +1554,19 @@ function googleTranslateElementInit() {
   <div class="stat-item"><div class="stat-num">Fast</div><div class="stat-lbl">Download Speed</div></div>
 </div>
 
+<!-- Ad before tools -->
+<div class="ad-inline">
+<script>
+  atOptions = {
+    'key' : 'e487d4ffd75aac4e9be5be595b3888d7',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/e487d4ffd75aac4e9be5be595b3888d7/invoke.js"></script>
+</div>
 <!-- TOOLS SECTION -->
 <div class="tools-section" id="toolsSection">
   <div class="section-head">
@@ -2210,8 +2267,15 @@ function doDownload() {
     } else {
       downloadUrl = 'https://api.vidsnap.site/proxy?url=' + encodeURIComponent(selQuality.url) + '&filename=' + encodeURIComponent(_filename);
     }
-    // Open download URL
-    window.open(downloadUrl, '_blank');
+    // Download file
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = _filename;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); }, 2000);
     document.body.style.overflow = '';
   }
 
